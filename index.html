@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Калькулятор VND ↔ RUB</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0a74da" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <h1>Калькулятор обмена</h1>
+      <p class="subtitle">VND ↔ RUB · реактивный конвертер</p>
+    </header>
+
+    <section class="cards">
+      <!-- My Prices -->
+      <section class="card">
+        <h2>Мои цены</h2>
+        <div class="grid two">
+          <div class="field inline">
+            <label>Цена за 1 USD</label>
+            <div class="input-with-postfix">
+              <input id="rubUsd" inputmode="decimal" placeholder="85,12" />
+              <span class="postfix">₽</span>
+            </div>
+          </div>
+          <div class="field small-checkbox">
+            <label class="checkbox-inline">NEW USD? <input id="newUsd" type="checkbox" /></label>
+          </div>
+          <div class="field">
+            <label>Цена за 1 EUR</label>
+            <div class="input-with-postfix">
+              <input id="rubEur" inputmode="decimal" placeholder="90,12" />
+              <span class="postfix">₽</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Market Rates -->
+      <section class="card">
+        <h2>Биржевой курс</h2>
+        <div class="grid three">
+          <div class="field">
+            <label>USD → VND (рынок)</label>
+            <div class="input-with-postfix">
+              <input id="usdVndMarket" readonly placeholder="—" />
+              <span class="postfix">₫</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>EUR → VND (рынок)</label>
+            <div class="input-with-postfix">
+              <input id="eurVndMarket" readonly placeholder="—" />
+              <span class="postfix">₫</span>
+            </div>
+          </div>
+          <div class="col actions">
+            <button id="fetchRates" class="btn">Подтянуть</button>
+            <button id="clearMarket" class="btn ghost">Очистить</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Exchange Rates (manual) -->
+      <section class="card">
+        <h2>Обменный курс (ручной)</h2>
+        <div class="grid three">
+          <div class="field">
+            <label>USD → VND (новые доллары)</label>
+            <div class="input-with-postfix">
+              <input id="usdVndNew" inputmode="numeric" placeholder="24000" />
+              <span class="postfix">₫</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>USD → VND (старые доллары)</label>
+            <div class="input-with-postfix">
+              <input id="usdVndOld" inputmode="numeric" placeholder="23900" />
+              <span class="postfix">₫</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>EUR → VND</label>
+            <div class="input-with-postfix">
+              <input id="eurVndManual" inputmode="numeric" placeholder="26000" />
+              <span class="postfix">₫</span>
+            </div>
+          </div>
+        </div>
+        <div id="marketDiff" class="muted small" style="margin-top:8px;display:none">Разница с биржевым: <span id="marketDiffText">—</span></div>
+      </section>
+
+      <!-- Converter -->
+      <section class="card">
+        <h2>Конвертер</h2>
+
+        <div class="field radio-group">
+          <div>Покупалась валюта:</div>
+          <label><input type="radio" name="currency" value="usd" id="radioUsd" checked /> USD</label>
+          <label><input type="radio" name="currency" value="eur" id="radioEur" /> EUR</label>
+        </div>
+
+        <div class="grid two">
+          <div class="field">
+            <label>Рубли (₽)</label>
+            <div class="input-with-postfix">
+              <input id="amountRub" inputmode="decimal" placeholder="1000" />
+              <span class="postfix">₽</span>
+            </div>
+          </div>
+          <div class="field">
+            <label>Донги (₫)</label>
+            <div class="input-with-postfix">
+              <input id="amountVnd" inputmode="numeric" placeholder="24000000" />
+              <span class="postfix">₫</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <button id="convertBtn" class="btn primary">Пересчитать</button>
+          <button id="resetBtn" class="btn ghost">Сброс</button>
+        </div>
+
+        <div class="result" id="out">—</div>
+        <div class="explain muted" id="explain"></div>
+      </section>
+
+      <section class="card small">
+        <h2>Разница</h2>
+        <div id="diff" class="muted">—</div>
+      </section>
+    </section>
+
+    <footer class="footer muted">Установите через «Поделиться → На экран «Домой»» в Safari.</footer>
+  </main>
+
+<script src="script.js"></script>
+</body>
+</html>

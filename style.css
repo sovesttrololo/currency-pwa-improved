@@ -1,0 +1,29 @@
+*{box-sizing:border-box}body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#f4f7fb;color:#0b1220}
+.app{max-width:820px;margin:12px auto;padding:12px}
+.topbar h1{margin:6px 0;font-size:20px}
+.subtitle{margin:0;color:#556;font-size:13px}
+.cards{display:grid;gap:12px}
+.card{background:#fff;border-radius:14px;padding:12px;box-shadow:0 8px 22px rgba(12,24,48,0.06)}
+.card.small{padding:10px;font-size:14px}
+h2{font-size:15px;margin:0 0 8px 0}
+.grid.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid.three{display:grid;grid-template-columns:1fr 1fr 140px;gap:8px}
+.field{display:flex;flex-direction:column}
+.field label{font-size:13px;color:#445;padding-bottom:6px}
+.input-with-postfix{position:relative;display:flex;align-items:center}
+.input-with-postfix input{width:100%;padding:10px;border-radius:10px;border:1px solid #e6eef8;background:#fbfdff;font-size:15px;padding-right:46px}
+.input-with-postfix .postfix{position:absolute;right:12px;color:#445;font-weight:600}
+input[readonly]{background:#f6f8fb;color:#667}
+.small-checkbox{display:flex;align-items:center;justify-content:center}
+.checkbox-inline{display:flex;align-items:center;gap:8px}
+.row{display:flex;gap:8px;align-items:center;margin-top:10px}
+.btn{padding:8px 12px;border-radius:10px;background:#eef5ff;border:1px solid #d9e9ff;cursor:pointer}
+.btn.ghost{background:transparent;border:1px dashed #d0d8e6}
+.btn.primary{background:#0a74da;color:#fff;border:0}
+.result{margin-top:12px;padding:10px;border-radius:10px;background:#f8fbff;border:1px solid #e3f0ff;font-weight:700;font-size:18px}
+.explain{margin-top:8px;font-size:13px}
+.muted{color:#6b7786;font-size:13px}
+.footer{text-align:center;margin-top:14px;color:#7a8897;font-size:13px;padding-bottom:40px}
+.radio-group{display:flex;gap:12px;align-items:center}
+.actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+@media (max-width:620px){.grid.two,.grid.three{grid-template-columns:1fr} .input-with-postfix input{padding-right:42px} .app{padding:10px}}
