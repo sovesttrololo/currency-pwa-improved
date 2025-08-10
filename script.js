@@ -545,11 +545,13 @@ function toggleCurrency() {
     updateCurrencyButton();
 }
 
-// Обновление текста кнопки валюты
+// Функция для обновления кнопки валюты в калькуляторе
 function updateCurrencyButton() {
     const currentCurrency = document.getElementById('currentCurrency').value;
     const button = document.getElementById('currencyToggleButton');
-    button.textContent = currentCurrency === 'USD' ? 'USD => VND' : 'EUR => VND';
+    if (button) {
+        button.textContent = currentCurrency === 'USD' ? 'USD => VND' : 'EUR => VND';
+    }
 }
 
 // Обновление основных полей из калькулятора
@@ -585,13 +587,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Добавляем обработчик для клика на полях калькулятора
-  document.getElementById('vndCalculatorField').addEventListener('click', () => {
-    setActiveCalculatorField('vnd');
-  });
+  if (document.getElementById('vndCalculatorField')) {
+    document.getElementById('vndCalculatorField').addEventListener('click', () => {
+        setActiveCalculatorField('vnd');
+    });
+  }
   
-  document.getElementById('rubCalculatorField').addEventListener('click', () => {
-    setActiveCalculatorField('rub');
-  });
+  if (document.getElementById('rubCalculatorField')) {
+    document.getElementById('rubCalculatorField').addEventListener('click', () => {
+        setActiveCalculatorField('rub');
+    });
+  }
   
   // Инициализация при загрузке
   calculate();
