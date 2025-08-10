@@ -27,8 +27,7 @@ function formatNumber(input) {
 
 function formatAndCalculate(input) {
     formatNumber(input);
-    calculate();
-    updateConversion();
+    handleCurrencyChange();
 }
 
 // Get numeric value from formatted input
@@ -65,8 +64,7 @@ async function fetchRates() {
         const eurToVnd = Math.round(usdToVnd / eurToUsd);
         document.getElementById('marketUsdVnd').value = usdToVnd.toLocaleString('ru-RU');
         document.getElementById('marketEurVnd').value = eurToVnd.toLocaleString('ru-RU');
-        calculate();
-        updateConversion();
+        handleCurrencyChange();
     } catch (error) {
         alert('Не удалось загрузить курсы валют. Проверьте интернет-соединение.');
     }
@@ -76,8 +74,7 @@ async function fetchRates() {
 function clearMarketRates() {
     document.getElementById('marketUsdVnd').value = '';
     document.getElementById('marketEurVnd').value = '';
-    calculate();
-    updateConversion();
+    handleCurrencyChange();
 }
 
 // Clear conversion fields
@@ -102,8 +99,7 @@ function clearAll() {
     document.getElementById('newUsd').checked = false;
     document.querySelector('input[name="currency"][value="USD"]').checked = true;
     
-    calculate();
-    calculateDifference();
+    handleCurrencyChange();
     
     if (isCalculatorMode && calculatorInitialized) {
         initCalculatorMode();
@@ -191,7 +187,7 @@ function calculate() {
     calculateDifference();
 }
 
-// Обработчик изменения валюты
+// Обработчик изменения валюты и других параметров
 function handleCurrencyChange() {
     calculate();
     updateConversion();
@@ -202,6 +198,8 @@ function handleCurrencyChange() {
         const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
         document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
         updateCurrencyButton();
+        // Также пересчитываем значения в калькуляторе
+        updateCalculatorFromMain();
     }
 }
 
@@ -270,6 +268,10 @@ function toggleCalculatorMode() {
     isCalculatorMode = !isCalculatorMode;
     
     if (isCalculatorMode) {
+        // Если калькулятор еще не создан, создаем его
+        if (!document.getElementById('calculatorMode')) {
+            createCalculator();
+        }
         calculatorMode.style.display = 'flex';
         conversionBlock.style.display = 'none';
         differenceBlock.style.display = 'none';
@@ -278,7 +280,9 @@ function toggleCalculatorMode() {
         initCalculatorMode();
         calculatorInitialized = true;
     } else {
-        calculatorMode.style.display = 'none';
+        if (calculatorMode) {
+            calculatorMode.style.display = 'none';
+        }
         conversionBlock.style.display = 'block';
         differenceBlock.style.display = 'block';
         toggleButton.textContent = 'Оставить только конвертор';
@@ -289,19 +293,193 @@ function toggleCalculatorMode() {
     }
 }
 
+// Создание HTML калькулятора
+function createCalculator() {
+    const calculatorHTML = `
+    <!-- Калькуляторный режим (скрыт по умолчанию) -->
+    <div class="calculator-mode" id="calculatorMode" style="display: none;">
+        <div class="calculator-header">
+            <div id="calculatorDifferenceResult" class="result-block">
+                Введите данные для расчета
+            </div>
+            <div class="input-field-container">
+                <div class="input-field" id="vndCalculatorField">
+                    <span class="currency-icon">₫</span>
+                    <div class="input-value" id="vndCalculatorValue" contenteditable="false">0</div>
+                </div>
+                <div class="exchange-icon-container">
+                    <div class="exchange-icon" id="exchangeIcon">⇵</div>
+                </div>
+                <div class="input-field" id="rubCalculatorField">
+                    <span class="currency-icon">₽</span>
+                    <div class="input-value" id="rubCalculatorValue" contenteditable="false">0</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="calculator-keypad">
+            <!-- Первая строка кнопок -->
+            <div class="keypad-row">
+                <button class="key action-key" id="backspaceBtn">⌫</button>
+                <button class="key action-key" id="clearActiveBtn">C</button>
+                <button class="key action-key" id="clearAllBtn">AC</button>
+                <button class="key math-key" id="divideBtn">÷</button>
+            </div>
+            <!-- Вторая строка кнопок -->
+            <div class="keypad-row">
+                <button class="key digit-key" id="digit7Btn">7</button>
+                <button class="key digit-key" id="digit8Btn">8</button>
+                <button class="key digit-key" id="digit9Btn">9</button>
+                <button class="key math-key" id="multiplyBtn">×</button>
+            </div>
+            <!-- Третья строка кнопок -->
+            <div class="keypad-row">
+                <button class="key digit-key" id="digit4Btn">4</button>
+                <button class="key digit-key" id="digit5Btn">5</button>
+                <button class="key digit-key" id="digit6Btn">6</button>
+                <button class="key math-key" id="subtractBtn">−</button>
+            </div>
+            <!-- Четвертая строка кнопок -->
+            <div class="keypad-row">
+                <button class="key digit-key" id="digit1Btn">1</button>
+                <button class="key digit-key" id="digit2Btn">2</button>
+                <button class="key digit-key" id="digit3Btn">3</button>
+                <button class="key math-key" id="addBtn">+</button>
+            </div>
+            <!-- Пятая строка кнопок -->
+            <div class="keypad-row">
+                <button class="key action-key exchange-currency" id="currencyToggleButton">
+                    USD => VND
+                </button>
+                <button class="key digit-key" id="digit0Btn">0</button>
+                <button class="key digit-key" id="decimalBtn">,</button>
+                <button class="key math-key" id="equalsBtn">=</button>
+            </div>
+        </div>
+        
+        <div class="calculator-footer">
+            <button id="clearAllFooterBtn" class="conversion-button-calculator">Сбросить все</button>
+            <button id="showAllFooterBtn" class="conversion-button-calculator">Показать всё</button>
+        </div>
+        
+        <!-- Скрытые поля для калькулятора -->
+        <input type="hidden" id="activeCalculatorField" value="vnd">
+        <input type="hidden" id="currentExpression" value="">
+        <input type="hidden" id="currentCurrency" value="USD">
+        <input type="hidden" id="calculatorLastActive" value="vnd">
+        <input type="hidden" id="calculatorState" value='{"currentInput":"0","operator":null,"firstValue":null,"waitingForSecondValue":false}'>
+    </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', calculatorHTML);
+    
+    // Добавляем обработчики событий после создания элементов
+    setTimeout(() => {
+        if (document.getElementById('vndCalculatorField')) {
+            document.getElementById('vndCalculatorField').addEventListener('click', () => {
+                setActiveCalculatorField('vnd');
+            });
+        }
+        if (document.getElementById('rubCalculatorField')) {
+            document.getElementById('rubCalculatorField').addEventListener('click', () => {
+                setActiveCalculatorField('rub');
+            });
+        }
+        if (document.getElementById('exchangeIcon')) {
+            document.getElementById('exchangeIcon').addEventListener('click', swapValues);
+        }
+        
+        // Кнопки калькулятора
+        if (document.getElementById('backspaceBtn')) {
+            document.getElementById('backspaceBtn').addEventListener('click', backspace);
+        }
+        if (document.getElementById('clearActiveBtn')) {
+            document.getElementById('clearActiveBtn').addEventListener('click', clearActiveField);
+        }
+        if (document.getElementById('clearAllBtn')) {
+            document.getElementById('clearAllBtn').addEventListener('click', clearAllFields);
+        }
+        if (document.getElementById('divideBtn')) {
+            document.getElementById('divideBtn').addEventListener('click', () => addOperator('/'));
+        }
+        if (document.getElementById('multiplyBtn')) {
+            document.getElementById('multiplyBtn').addEventListener('click', () => addOperator('*'));
+        }
+        if (document.getElementById('subtractBtn')) {
+            document.getElementById('subtractBtn').addEventListener('click', () => addOperator('-'));
+        }
+        if (document.getElementById('addBtn')) {
+            document.getElementById('addBtn').addEventListener('click', () => addOperator('+'));
+        }
+        if (document.getElementById('digit7Btn')) {
+            document.getElementById('digit7Btn').addEventListener('click', () => addDigit('7'));
+        }
+        if (document.getElementById('digit8Btn')) {
+            document.getElementById('digit8Btn').addEventListener('click', () => addDigit('8'));
+        }
+        if (document.getElementById('digit9Btn')) {
+            document.getElementById('digit9Btn').addEventListener('click', () => addDigit('9'));
+        }
+        if (document.getElementById('digit4Btn')) {
+            document.getElementById('digit4Btn').addEventListener('click', () => addDigit('4'));
+        }
+        if (document.getElementById('digit5Btn')) {
+            document.getElementById('digit5Btn').addEventListener('click', () => addDigit('5'));
+        }
+        if (document.getElementById('digit6Btn')) {
+            document.getElementById('digit6Btn').addEventListener('click', () => addDigit('6'));
+        }
+        if (document.getElementById('digit1Btn')) {
+            document.getElementById('digit1Btn').addEventListener('click', () => addDigit('1'));
+        }
+        if (document.getElementById('digit2Btn')) {
+            document.getElementById('digit2Btn').addEventListener('click', () => addDigit('2'));
+        }
+        if (document.getElementById('digit3Btn')) {
+            document.getElementById('digit3Btn').addEventListener('click', () => addDigit('3'));
+        }
+        if (document.getElementById('digit0Btn')) {
+            document.getElementById('digit0Btn').addEventListener('click', () => addDigit('0'));
+        }
+        if (document.getElementById('decimalBtn')) {
+            document.getElementById('decimalBtn').addEventListener('click', () => addDigit('.'));
+        }
+        if (document.getElementById('equalsBtn')) {
+            document.getElementById('equalsBtn').addEventListener('click', calculateExpression);
+        }
+        if (document.getElementById('currencyToggleButton')) {
+            document.getElementById('currencyToggleButton').addEventListener('click', toggleCurrency);
+        }
+        
+        // Кнопки в футере
+        if (document.getElementById('clearAllFooterBtn')) {
+            document.getElementById('clearAllFooterBtn').addEventListener('click', clearAll);
+        }
+        if (document.getElementById('showAllFooterBtn')) {
+            document.getElementById('showAllFooterBtn').addEventListener('click', toggleCalculatorMode);
+        }
+    }, 0);
+}
+
 // Инициализация калькуляторного режима
 function initCalculatorMode() {
     const vndValue = document.getElementById('vndAmount').value.replace(/\s/g, '') || '0';
     const rubValue = document.getElementById('rubAmount').value.replace(/\s/g, '') || '0';
     
-    document.getElementById('vndCalculatorValue').textContent = formatDisplayValue(vndValue);
-    document.getElementById('rubCalculatorValue').textContent = formatDisplayValue(rubValue);
+    if (document.getElementById('vndCalculatorValue')) {
+        document.getElementById('vndCalculatorValue').textContent = formatDisplayValue(vndValue);
+    }
+    if (document.getElementById('rubCalculatorValue')) {
+        document.getElementById('rubCalculatorValue').textContent = formatDisplayValue(rubValue);
+    }
     
     const activeField = lastActiveField === 'vnd' ? 'vnd' : 'rub';
     setActiveCalculatorField(activeField);
     
     const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
-    document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
+    if (document.getElementById('currentCurrency')) {
+        document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
+    }
     updateCurrencyButton();
     
     calculateDifference();
@@ -314,27 +492,49 @@ function updateCalculatorFromMain() {
     const vndValue = document.getElementById('vndAmount').value.replace(/\s/g, '') || '0';
     const rubValue = document.getElementById('rubAmount').value.replace(/\s/g, '') || '0';
     
-    document.getElementById('vndCalculatorValue').textContent = formatDisplayValue(vndValue);
-    document.getElementById('rubCalculatorValue').textContent = formatDisplayValue(rubValue);
+    if (document.getElementById('vndCalculatorValue')) {
+        document.getElementById('vndCalculatorValue').textContent = formatDisplayValue(vndValue);
+    }
+    if (document.getElementById('rubCalculatorValue')) {
+        document.getElementById('rubCalculatorValue').textContent = formatDisplayValue(rubValue);
+    }
     
     const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
-    document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
+    if (document.getElementById('currentCurrency')) {
+        document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
+    }
     updateCurrencyButton();
 }
 
 // Установка активного поля в калькуляторе
 function setActiveCalculatorField(field) {
-    document.getElementById('activeCalculatorField').value = field;
-    document.getElementById('calculatorLastActive').value = field;
+    if (document.getElementById('activeCalculatorField')) {
+        document.getElementById('activeCalculatorField').value = field;
+    }
+    if (document.getElementById('calculatorLastActive')) {
+        document.getElementById('calculatorLastActive').value = field;
+    }
     
-    document.getElementById('vndCalculatorField').classList.toggle('active', field === 'vnd');
-    document.getElementById('rubCalculatorField').classList.toggle('active', field === 'rub');
+    if (document.getElementById('vndCalculatorField')) {
+        document.getElementById('vndCalculatorField').classList.toggle('active', field === 'vnd');
+    }
+    if (document.getElementById('rubCalculatorField')) {
+        document.getElementById('rubCalculatorField').classList.toggle('active', field === 'rub');
+    }
 }
 
 // Получение состояния калькулятора
 function getCalculatorState() {
+    const stateInput = document.getElementById('calculatorState');
+    if (!stateInput) return {
+        currentInput: '0',
+        operator: null,
+        firstValue: null,
+        waitingForSecondValue: false
+    };
+    
     try {
-        return JSON.parse(document.getElementById('calculatorState').value);
+        return JSON.parse(stateInput.value);
     } catch (e) {
         return {
             currentInput: '0',
@@ -347,15 +547,21 @@ function getCalculatorState() {
 
 // Сохранение состояния калькулятора
 function setCalculatorState(state) {
-    document.getElementById('calculatorState').value = JSON.stringify(state);
+    const stateInput = document.getElementById('calculatorState');
+    if (stateInput) {
+        stateInput.value = JSON.stringify(state);
+    }
 }
 
 // Добавление цифры
 function addDigit(digit) {
-    const field = document.getElementById('activeCalculatorField').value;
-    const display = document.getElementById(`${field}CalculatorValue`);
-    let value = formatCalcValue(display.textContent);
+    const fieldElement = document.getElementById('activeCalculatorField');
+    const displayElement = fieldElement ? 
+        document.getElementById(`${fieldElement.value}CalculatorValue`) : null;
     
+    if (!displayElement) return;
+    
+    let value = formatCalcValue(displayElement.textContent);
     const state = getCalculatorState();
     
     // Если ждем второе значение, начинаем новое
@@ -372,7 +578,7 @@ function addDigit(digit) {
     if (digit === '.' && value.includes('.')) return;
     
     value += digit;
-    display.textContent = formatDisplayValue(value);
+    displayElement.textContent = formatDisplayValue(value);
     
     state.currentInput = value;
     setCalculatorState(state);
@@ -382,10 +588,13 @@ function addDigit(digit) {
 
 // Добавление оператора
 function addOperator(operator) {
-    const field = document.getElementById('activeCalculatorField').value;
-    const display = document.getElementById(`${field}CalculatorValue`);
-    let value = formatCalcValue(display.textContent);
+    const fieldElement = document.getElementById('activeCalculatorField');
+    const displayElement = fieldElement ? 
+        document.getElementById(`${fieldElement.value}CalculatorValue`) : null;
     
+    if (!displayElement) return;
+    
+    let value = formatCalcValue(displayElement.textContent);
     const state = getCalculatorState();
     
     // Если это первый оператор
@@ -408,7 +617,7 @@ function addOperator(operator) {
     const secondValue = parseFloat(value);
     const result = performCalculation(state.firstValue, secondValue, state.operator);
     
-    display.textContent = formatDisplayValue(result.toString());
+    displayElement.textContent = formatDisplayValue(result.toString());
     
     state.firstValue = result;
     state.currentInput = result.toString();
@@ -439,10 +648,13 @@ function performCalculation(firstValue, secondValue, operator) {
 
 // Вычисление выражения
 function calculateExpression() {
-    const field = document.getElementById('activeCalculatorField').value;
-    const display = document.getElementById(`${field}CalculatorValue`);
-    let value = formatCalcValue(display.textContent);
+    const fieldElement = document.getElementById('activeCalculatorField');
+    const displayElement = fieldElement ? 
+        document.getElementById(`${fieldElement.value}CalculatorValue`) : null;
     
+    if (!displayElement) return;
+    
+    let value = formatCalcValue(displayElement.textContent);
     const state = getCalculatorState();
     
     if (!state.operator || state.firstValue === null) {
@@ -452,7 +664,7 @@ function calculateExpression() {
     const secondValue = parseFloat(value);
     const result = performCalculation(state.firstValue, secondValue, state.operator);
     
-    display.textContent = formatDisplayValue(result.toString());
+    displayElement.textContent = formatDisplayValue(result.toString());
     
     state.currentInput = result.toString();
     state.firstValue = result;
@@ -466,13 +678,19 @@ function calculateExpression() {
 
 // Обмен значениями между полями
 function swapValues() {
-    const vndValue = document.getElementById('vndCalculatorValue').textContent;
-    const rubValue = document.getElementById('rubCalculatorValue').textContent;
+    const vndElement = document.getElementById('vndCalculatorValue');
+    const rubElement = document.getElementById('rubCalculatorValue');
     
-    document.getElementById('vndCalculatorValue').textContent = rubValue;
-    document.getElementById('rubCalculatorValue').textContent = vndValue;
+    if (!vndElement || !rubElement) return;
     
-    const activeField = document.getElementById('activeCalculatorField').value;
+    const vndValue = vndElement.textContent;
+    const rubValue = rubElement.textContent;
+    
+    vndElement.textContent = rubValue;
+    rubElement.textContent = vndValue;
+    
+    const activeFieldElement = document.getElementById('activeCalculatorField');
+    const activeField = activeFieldElement ? activeFieldElement.value : 'vnd';
     setActiveCalculatorField(activeField === 'vnd' ? 'rub' : 'vnd');
     
     updateMainFields();
@@ -481,10 +699,13 @@ function swapValues() {
 
 // Удаление последнего символа
 function backspace() {
-    const field = document.getElementById('activeCalculatorField').value;
-    const display = document.getElementById(`${field}CalculatorValue`);
-    let value = formatCalcValue(display.textContent);
+    const fieldElement = document.getElementById('activeCalculatorField');
+    const displayElement = fieldElement ? 
+        document.getElementById(`${fieldElement.value}CalculatorValue`) : null;
     
+    if (!displayElement) return;
+    
+    let value = formatCalcValue(displayElement.textContent);
     const state = getCalculatorState();
     
     if (value.length > 1) {
@@ -493,7 +714,7 @@ function backspace() {
         value = '0';
     }
     
-    display.textContent = formatDisplayValue(value);
+    displayElement.textContent = formatDisplayValue(value);
     
     state.currentInput = value;
     setCalculatorState(state);
@@ -503,8 +724,13 @@ function backspace() {
 
 // Очистка активного поля
 function clearActiveField() {
-    const field = document.getElementById('activeCalculatorField').value;
-    document.getElementById(`${field}CalculatorValue`).textContent = '0';
+    const fieldElement = document.getElementById('activeCalculatorField');
+    const displayElement = fieldElement ? 
+        document.getElementById(`${fieldElement.value}CalculatorValue`) : null;
+    
+    if (!displayElement) return;
+    
+    displayElement.textContent = '0';
     
     const state = getCalculatorState();
     state.currentInput = '0';
@@ -515,15 +741,21 @@ function clearActiveField() {
 
 // Очистка всех полей
 function clearAllFields() {
-    document.getElementById('vndCalculatorValue').textContent = '0';
-    document.getElementById('rubCalculatorValue').textContent = '0';
+    const vndElement = document.getElementById('vndCalculatorValue');
+    const rubElement = document.getElementById('rubCalculatorValue');
+    const stateElement = document.getElementById('calculatorState');
     
-    document.getElementById('calculatorState').value = JSON.stringify({
-        currentInput: '0',
-        operator: null,
-        firstValue: null,
-        waitingForSecondValue: false
-    });
+    if (vndElement) vndElement.textContent = '0';
+    if (rubElement) rubElement.textContent = '0';
+    
+    if (stateElement) {
+        stateElement.value = JSON.stringify({
+            currentInput: '0',
+            operator: null,
+            firstValue: null,
+            waitingForSecondValue: false
+        });
+    }
     
     updateMainFields();
     calculateDifference();
@@ -531,167 +763,34 @@ function clearAllFields() {
 
 // Переключение валюты (USD/EUR)
 function toggleCurrency() {
-    const currentCurrency = document.getElementById('currentCurrency').value;
+    const currencyElement = document.getElementById('currentCurrency');
+    if (!currencyElement) return;
+    
+    const currentCurrency = currencyElement.value;
     const newCurrency = currentCurrency === 'USD' ? 'EUR' : 'USD';
     
-    document.getElementById('currentCurrency').value = newCurrency;
+    currencyElement.value = newCurrency;
     
     // Обновляем радиокнопки в основном режиме
-    if (document.querySelector(`input[name="currency"][value="${newCurrency}"]`)) {
-        document.querySelector(`input[name="currency"][value="${newCurrency}"]`).checked = true;
+    const radioToCheck = document.querySelector(`input[name="currency"][value="${newCurrency}"]`);
+    if (radioToCheck) {
+        radioToCheck.checked = true;
         handleCurrencyChange();
     }
     
     updateCurrencyButton();
 }
 
-// Функция для обновления кнопки валюты в калькуляторе
+// Обновление текста кнопки валюты
 function updateCurrencyButton() {
-    const currentCurrency = document.getElementById('currentCurrency').value;
-    const button = document.getElementById('currencyToggleButton');
-    if (button) {
-        button.textContent = currentCurrency === 'USD' ? 'USD => VND' : 'EUR => VND';
-    }
+    const currencyElement = document.getElementById('currentCurrency');
+    const buttonElement = document.getElementById('currencyToggleButton');
+    
+    if (!currencyElement || !buttonElement) return;
+    
+    const currentCurrency = currencyElement.value;
+    buttonElement.textContent = currentCurrency === 'USD' ? 'USD => VND' : 'EUR => VND';
 }
 
 // Обновление основных полей из калькулятора
 function updateMainFields() {
-    const vndValue = formatCalcValue(document.getElementById('vndCalculatorValue').textContent);
-    const rubValue = formatCalcValue(document.getElementById('rubCalculatorValue').textContent);
-    
-    document.getElementById('vndAmount').value = vndValue === '0' ? '' : formatDisplayValue(vndValue);
-    document.getElementById('rubAmount').value = rubValue === '0' ? '' : formatDisplayValue(rubValue);
-    
-    const lastActive = document.getElementById('calculatorLastActive').value;
-    lastActiveField = lastActive;
-    
-    calculate();
-    updateConversion();
-    calculateDifference();
-}
-
-// При вводе сохраняем значение поля
-document.querySelectorAll('input').forEach(input => {
-  input.addEventListener('input', () => {
-    localStorage.setItem(input.id, input.value);
-  });
-});
-
-// При загрузке страницы восстанавливаем значения
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('input').forEach(input => {
-    const savedValue = localStorage.getItem(input.id);
-    if (savedValue !== null) {
-      input.value = savedValue;
-    }
-  });
-  
-  // Добавляем обработчик для клика на полях калькулятора
-  if (document.getElementById('vndCalculatorField')) {
-    document.getElementById('vndCalculatorField').addEventListener('click', () => {
-        setActiveCalculatorField('vnd');
-    });
-  }
-  
-  if (document.getElementById('rubCalculatorField')) {
-    document.getElementById('rubCalculatorField').addEventListener('click', () => {
-        setActiveCalculatorField('rub');
-    });
-  }
-  
-  // Инициализация при загрузке
-  calculate();
-  updateConversion();
-  calculateDifference();
-  
-  // Добавляем обработчики для радиокнопок
-  document.querySelectorAll('input[name="currency"]').forEach(radio => {
-    radio.addEventListener('change', handleCurrencyChange);
-  });
-  
-  // Добавляем обработчик для чекбокса новых долларов
-  document.getElementById('newUsd').addEventListener('change', () => {
-    calculate();
-    updateConversion();
-    calculateDifference();
-  });
-  
-  // Добавим HTML калькулятора в конец body
-  const calculatorHTML = `
-  <!-- Калькуляторный режим (скрыт по умолчанию) -->
-  <div class="calculator-mode" id="calculatorMode" style="display: none;">
-      <div class="calculator-header">
-          <div id="calculatorDifferenceResult" class="result-block" style="margin-bottom: 15px;">
-              Введите данные для расчета
-          </div>
-          <div class="input-field-container">
-              <div class="input-field" id="vndCalculatorField">
-                  <span class="currency-icon">₫</span>
-                  <div class="input-value" id="vndCalculatorValue" contenteditable="false">0</div>
-              </div>
-              <div class="exchange-icon-container">
-                  <div class="exchange-icon" onclick="swapValues()">⇵</div>
-              </div>
-              <div class="input-field" id="rubCalculatorField">
-                  <span class="currency-icon">₽</span>
-                  <div class="input-value" id="rubCalculatorValue" contenteditable="false">0</div>
-              </div>
-          </div>
-      </div>
-      
-      <div class="calculator-keypad">
-          <!-- Первая строка кнопок -->
-          <div class="keypad-row">
-              <button class="key action-key" onclick="backspace()">⌫</button>
-              <button class="key action-key" onclick="clearActiveField()">C</button>
-              <button class="key action-key" onclick="clearAllFields()">AC</button>
-              <button class="key math-key" onclick="addOperator('/')">÷</button>
-          </div>
-          <!-- Вторая строка кнопок -->
-          <div class="keypad-row">
-              <button class="key digit-key" onclick="addDigit(7)">7</button>
-              <button class="key digit-key" onclick="addDigit(8)">8</button>
-              <button class="key digit-key" onclick="addDigit(9)">9</button>
-              <button class="key math-key" onclick="addOperator('*')">×</button>
-          </div>
-          <!-- Третья строка кнопок -->
-          <div class="keypad-row">
-              <button class="key digit-key" onclick="addDigit(4)">4</button>
-              <button class="key digit-key" onclick="addDigit(5)">5</button>
-              <button class="key digit-key" onclick="addDigit(6)">6</button>
-              <button class="key math-key" onclick="addOperator('-')">−</button>
-          </div>
-          <!-- Четвертая строка кнопок -->
-          <div class="keypad-row">
-              <button class="key digit-key" onclick="addDigit(1)">1</button>
-              <button class="key digit-key" onclick="addDigit(2)">2</button>
-              <button class="key digit-key" onclick="addDigit(3)">3</button>
-              <button class="key math-key" onclick="addOperator('+')">+</button>
-          </div>
-          <!-- Пятая строка кнопок -->
-          <div class="keypad-row">
-              <button class="key action-key exchange-currency" onclick="toggleCurrency()" id="currencyToggleButton">
-                  USD => VND
-              </button>
-              <button class="key digit-key" onclick="addDigit(0)">0</button>
-              <button class="key digit-key" onclick="addDigit('.')">,</button>
-              <button class="key math-key" onclick="calculateExpression()">=</button>
-          </div>
-      </div>
-      
-      <div class="calculator-footer">
-          <button onclick="clearAll()" class="conversion-button-calculator">Сбросить все</button>
-          <button onclick="toggleCalculatorMode()" class="conversion-button-calculator">Показать всё</button>
-      </div>
-      
-      <!-- Скрытые поля для калькулятора -->
-      <input type="hidden" id="activeCalculatorField" value="vnd">
-      <input type="hidden" id="currentExpression" value="">
-      <input type="hidden" id="currentCurrency" value="USD">
-      <input type="hidden" id="calculatorLastActive" value="vnd">
-      <input type="hidden" id="calculatorState" value='{"currentInput":"0","operator":null,"firstValue":null,"waitingForSecondValue":false}'>
-  </div>
-  `;
-  
-  document.body.insertAdjacentHTML('beforeend', calculatorHTML);
-});
