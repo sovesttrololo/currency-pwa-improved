@@ -284,7 +284,7 @@ button:active {
 
 .calculator-header {
     flex: 0 0 auto;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 #calculatorDifferenceResult {
@@ -301,7 +301,7 @@ button:active {
     justify-content: center !important;
     font-weight: 500 !important;
     box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3) !important;
-    margin-bottom: 20px !important;
+    margin-bottom: 10px !important;
 }
 
 .input-field-container {
@@ -309,7 +309,7 @@ button:active {
     flex-direction: column;
     width: 100%;
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .exchange-icon-container {
@@ -360,7 +360,7 @@ button:active {
     white-space: nowrap;
     outline: none;
     width: 100%;
-    color: #333;
+    color: #555; /* Светлее, но не как у кнопок */
 }
 
 .input-value:empty::before {
@@ -373,28 +373,28 @@ button:active {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .keypad-row {
     display: flex;
     justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 8px;
+    margin-bottom: 8px;
 }
 
 .key {
     flex: 1;
-    height: 60px;
-    border-radius: 12px;
-    font-size: 24px;
+    height: 55px;
+    border-radius: 10px;
+    font-size: 22px;
     margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.1s;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
     border: none;
     font-weight: 500;
     -webkit-tap-highlight-color: transparent;
@@ -404,12 +404,12 @@ button:active {
 .key:active {
     transform: scale(0.95);
     opacity: 0.8;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .digit-key {
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: #e8e8e8;
+    color: #444; /* Светлее, но не как у кнопок */
     font-weight: 600;
 }
 
@@ -420,7 +420,7 @@ button:active {
 }
 
 .action-key {
-    background-color: #a6a6a6;
+    background-color: #b0b0b0;
     color: white;
     font-weight: 600;
 }
@@ -428,22 +428,22 @@ button:active {
 .action-key.exchange-currency {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    font-size: 16px;
+    font-size: 14px; /* Шрифт чуть меньше */
     font-weight: bold;
 }
 
 .calculator-footer {
     display: flex;
     gap: 10px;
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 .conversion-button-calculator {
     flex: 1;
     min-width: 100px;
-    padding: 15px;
-    font-size: 16px;
-    border-radius: 12px;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 10px;
 }
 
 /* Для мобильных устройств */
@@ -459,8 +459,8 @@ button:active {
     
     .key {
         font-size: 20px;
-        height: 55px;
-        border-radius: 10px;
+        height: 50px;
+        border-radius: 8px;
     }
     
     .exchange-icon-container {
@@ -479,5 +479,18 @@ button:active {
     #calculatorDifferenceResult {
         font-size: 14px !important;
         padding: 12px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .input-field-container {
+        margin-bottom: 8px;
+    }
+    
+    .calculator-keypad {
+        margin-bottom: 8px;
+    }
+    
+    .calculator-footer {
+        margin-top: 5px;
     }
 }
