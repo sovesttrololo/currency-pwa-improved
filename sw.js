@@ -1,4 +1,4 @@
-const CACHE_NAME = 'currency-calc-v1';
+const CACHE_NAME = 'currency-calc-v2'; // Изменена версия кэша
 const urlsToCache = [
   './',
   './index.html',
@@ -37,30 +37,36 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Обработка запросов
+// Обработка запросов - сначала сеть, потом кэш (Network First для HTML/JS/CSS)
 self.addEventListener('fetch', event => {
-  // Игнорируем запросы, которые не поддерживаются (например, chrome-extension)
-  if (!event.request.url.startsWith('http')) {
-    return;
-  }
-
-  event.respondWith(
-    // Сначала пытаемся получить ресурс из сети
-    fetch(event.request)
-      .then(response => {
-        // Если запрос успешен, клонируем ответ и сохраняем его в кэш
-        if (response && response.status === 200 && response.type === 'basic') {
+  // Для HTML, CSS, JS файлов используем Network First стратегию
+  if (event.request.destination === 'document' || 
+      event.request.destination === 'script' || 
+      event.request.destination === 'style') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // Клонируем ответ для кэширования
           const responseToCache = response.clone();
           caches.open(CACHE_NAME)
             .then(cache => {
               cache.put(event.request, responseToCache);
             });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Если сеть недоступна, пытаемся получить ресурс из кэша
-        return caches.match(event.request);
-      })
-  );
+          return response;
+        })
+        .catch(() => {
+          // Если сеть недоступна, берем из кэша
+          return caches.match(event.request);
+        })
+    );
+  } else {
+    // Для других ресурсов (изображения и т.д.) используем Cache First
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
+          // Возвращаем кэшированную версию или загружаем из сети
+          return response || fetch(event.request);
+        })
+    );
+  }
 });
