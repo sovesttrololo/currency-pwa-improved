@@ -156,11 +156,11 @@ function exchangeDiff(market, exchange, prise) {
             
             // USD New difference - corrected formula
             const exchangeUsdNew = getNumericValue('exchangeUsdVndNew');
-         exchangeDiff(marketUs,exchangeUsdNew,usdPrice);    
+         exchangeDiff(marketUsd,exchangeUsdNew,usdPrice);    
             
             // USD Old difference - corrected formula
             const exchangeUsdOld = getNumericValue('exchangeUsdVndOld');
-         exchangeDiff(marketUs,exchangeUsdOld,usdPrice);
+         exchangeDiff(marketUsd,exchangeUsdOld,usdPrice);
             
             // EUR difference - corrected formula
             const exchangeEur = getNumericValue('exchangeEurVnd');
