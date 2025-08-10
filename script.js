@@ -845,7 +845,7 @@ document.querySelectorAll('input').forEach(input => {
         const valueToStore = input.value;
         const keyToStoe = input.key;
             localStorage.setItem(input.id, valueToStore);
-         if (keyToStoe.trim() == 'EUR' || keyToStoe.trim() == 'USD' || valueToStore.trim() == 'EUR' || valueToStore.trim() == 'USD' ) {
+         if (keyToStoe == 'EUR' || keyToStoe == 'USD' || valueToStore == 'EUR' || valueToStore == 'USD' ) {
              localStorage.removeItem(input.id);
          }
         }
