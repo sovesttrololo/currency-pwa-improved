@@ -294,8 +294,8 @@ function initCalculatorMode() {
     const vndValue = document.getElementById('vndAmount').value.replace(/\s/g, '') || '0';
     const rubValue = document.getElementById('rubAmount').value.replace(/\s/g, '') || '0';
     
-    document.getElementById('vndCalculatorValue').textContent = vndValue === '' ? '0' : vndValue;
-    document.getElementById('rubCalculatorValue').textContent = rubValue === '' ? '0' : rubValue;
+    document.getElementById('vndCalculatorValue').textContent = formatDisplayValue(vndValue);
+    document.getElementById('rubCalculatorValue').textContent = formatDisplayValue(rubValue);
     
     const activeField = lastActiveField === 'vnd' ? 'vnd' : 'rub';
     setActiveCalculatorField(activeField);
@@ -314,8 +314,8 @@ function updateCalculatorFromMain() {
     const vndValue = document.getElementById('vndAmount').value.replace(/\s/g, '') || '0';
     const rubValue = document.getElementById('rubAmount').value.replace(/\s/g, '') || '0';
     
-    document.getElementById('vndCalculatorValue').textContent = vndValue === '' ? '0' : vndValue;
-    document.getElementById('rubCalculatorValue').textContent = rubValue === '' ? '0' : rubValue;
+    document.getElementById('vndCalculatorValue').textContent = formatDisplayValue(vndValue);
+    document.getElementById('rubCalculatorValue').textContent = formatDisplayValue(rubValue);
     
     const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
     document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
@@ -331,11 +331,39 @@ function setActiveCalculatorField(field) {
     document.getElementById('rubCalculatorField').classList.toggle('active', field === 'rub');
 }
 
+// Получение состояния калькулятора
+function getCalculatorState() {
+    try {
+        return JSON.parse(document.getElementById('calculatorState').value);
+    } catch (e) {
+        return {
+            currentInput: '0',
+            operator: null,
+            firstValue: null,
+            waitingForSecondValue: false
+        };
+    }
+}
+
+// Сохранение состояния калькулятора
+function setCalculatorState(state) {
+    document.getElementById('calculatorState').value = JSON.stringify(state);
+}
+
 // Добавление цифры
 function addDigit(digit) {
     const field = document.getElementById('activeCalculatorField').value;
     const display = document.getElementById(`${field}CalculatorValue`);
-    let value = display.textContent;
+    let value = formatCalcValue(display.textContent);
+    
+    const state = getCalculatorState();
+    
+    // Если ждем второе значение, начинаем новое
+    if (state.waitingForSecondValue) {
+        value = '0';
+        state.waitingForSecondValue = false;
+        state.currentInput = '0';
+    }
     
     if (value === '0' && digit !== '.') {
         value = '';
@@ -344,21 +372,96 @@ function addDigit(digit) {
     if (digit === '.' && value.includes('.')) return;
     
     value += digit;
-    display.textContent = value;
+    display.textContent = formatDisplayValue(value);
+    
+    state.currentInput = value;
+    setCalculatorState(state);
     
     updateMainFields();
 }
 
 // Добавление оператора
 function addOperator(operator) {
-    // Для простого калькулятора мы будем использовать только базовые операции
-    // Но в данном случае мы просто обновляем значения
-    console.log('Оператор:', operator);
+    const field = document.getElementById('activeCalculatorField').value;
+    const display = document.getElementById(`${field}CalculatorValue`);
+    let value = formatCalcValue(display.textContent);
+    
+    const state = getCalculatorState();
+    
+    // Если это первый оператор
+    if (!state.operator) {
+        state.firstValue = parseFloat(value);
+        state.operator = operator;
+        state.waitingForSecondValue = true;
+        setCalculatorState(state);
+        return;
+    }
+    
+    // Если уже есть оператор и ждем второе значение
+    if (state.waitingForSecondValue) {
+        state.operator = operator;
+        setCalculatorState(state);
+        return;
+    }
+    
+    // Вычисляем промежуточный результат
+    const secondValue = parseFloat(value);
+    const result = performCalculation(state.firstValue, secondValue, state.operator);
+    
+    display.textContent = formatDisplayValue(result.toString());
+    
+    state.firstValue = result;
+    state.currentInput = result.toString();
+    state.operator = operator;
+    state.waitingForSecondValue = true;
+    setCalculatorState(state);
+    
+    updateMainFields();
 }
 
-// Вычисление выражения (в данном случае просто обновление)
+// Выполнение вычисления
+function performCalculation(firstValue, secondValue, operator) {
+    switch (operator) {
+        case '+':
+            return firstValue + secondValue;
+        case '-':
+            return firstValue - secondValue;
+        case '*':
+        case '×':
+            return firstValue * secondValue;
+        case '/':
+        case '÷':
+            return firstValue / secondValue;
+        default:
+            return secondValue;
+    }
+}
+
+// Вычисление выражения
 function calculateExpression() {
+    const field = document.getElementById('activeCalculatorField').value;
+    const display = document.getElementById(`${field}CalculatorValue`);
+    let value = formatCalcValue(display.textContent);
+    
+    const state = getCalculatorState();
+    
+    if (!state.operator || state.firstValue === null) {
+        return;
+    }
+    
+    const secondValue = parseFloat(value);
+    const result = performCalculation(state.firstValue, secondValue, state.operator);
+    
+    display.textContent = formatDisplayValue(result.toString());
+    
+    state.currentInput = result.toString();
+    state.firstValue = result;
+    state.operator = null;
+    state.waitingForSecondValue = false;
+    setCalculatorState(state);
+    
     updateMainFields();
+    calculateDifference();
 }
 
 // Обмен значениями между полями
@@ -380,7 +483,9 @@ function swapValues() {
 function backspace() {
     const field = document.getElementById('activeCalculatorField').value;
     const display = document.getElementById(`${field}CalculatorValue`);
-    let value = display.textContent;
+    let value = formatCalcValue(display.textContent);
+    
+    const state = getCalculatorState();
     
     if (value.length > 1) {
         value = value.slice(0, -1);
@@ -388,7 +493,11 @@ function backspace() {
         value = '0';
     }
     
-    display.textContent = value;
+    display.textContent = formatDisplayValue(value);
+    
+    state.currentInput = value;
+    setCalculatorState(state);
+    
     updateMainFields();
 }
 
@@ -396,6 +505,11 @@ function backspace() {
 function clearActiveField() {
     const field = document.getElementById('activeCalculatorField').value;
     document.getElementById(`${field}CalculatorValue`).textContent = '0';
+    
+    const state = getCalculatorState();
+    state.currentInput = '0';
+    setCalculatorState(state);
+    
     updateMainFields();
 }
 
@@ -403,6 +517,14 @@ function clearActiveField() {
 function clearAllFields() {
     document.getElementById('vndCalculatorValue').textContent = '0';
     document.getElementById('rubCalculatorValue').textContent = '0';
+    
+    document.getElementById('calculatorState').value = JSON.stringify({
+        currentInput: '0',
+        operator: null,
+        firstValue: null,
+        waitingForSecondValue: false
+    });
+    
     updateMainFields();
     calculateDifference();
 }
@@ -432,8 +554,8 @@ function updateCurrencyButton() {
 
 // Обновление основных полей из калькулятора
 function updateMainFields() {
-    const vndValue = document.getElementById('vndCalculatorValue').textContent;
-    const rubValue = document.getElementById('rubCalculatorValue').textContent;
+    const vndValue = formatCalcValue(document.getElementById('vndCalculatorValue').textContent);
+    const rubValue = formatCalcValue(document.getElementById('rubCalculatorValue').textContent);
     
     document.getElementById('vndAmount').value = vndValue === '0' ? '' : formatDisplayValue(vndValue);
     document.getElementById('rubAmount').value = rubValue === '0' ? '' : formatDisplayValue(rubValue);
@@ -487,8 +609,4 @@ document.addEventListener('DOMContentLoaded', () => {
     updateConversion();
     calculateDifference();
   });
-  
-  // Добавляем обработчики для полей ввода калькулятора
-  document.getElementById('vndCalculatorValue').addEventListener('input', updateMainFields);
-  document.getElementById('rubCalculatorValue').addEventListener('input', updateMainFields);
 });
