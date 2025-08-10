@@ -134,15 +134,7 @@
             }
         }
 
-        // Main calculation function
-        function calculate() {
-            // Calculate differences for exchange rates
-            const marketUsd = getNumericValue('marketUsdVnd');
-            const marketEur = getNumericValue('marketEurVnd');
-            const usdPrice = getNumericValue('usdPrice');
-            const eurPrice = getNumericValue('eurPrice');
-
-         let exchangeDiff(market, exchange, prise) {
+function exchangeDiff(market, exchange, prise) {
              if (market && exchange && prise) {
                 const diff = market - exchange;
                 const rubDiff = diff / (exchange / prise);
@@ -153,6 +145,14 @@
                 document.getElementById('diffUsdNew').style.display = 'none';
             }          
         }
+
+        // Main calculation function
+        function calculate() {
+            // Calculate differences for exchange rates
+            const marketUsd = getNumericValue('marketUsdVnd');
+            const marketEur = getNumericValue('marketEurVnd');
+            const usdPrice = getNumericValue('usdPrice');
+            const eurPrice = getNumericValue('eurPrice');
             
             // USD New difference - corrected formula
             const exchangeUsdNew = getNumericValue('exchangeUsdVndNew');
