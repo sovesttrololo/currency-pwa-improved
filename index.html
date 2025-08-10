@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Калькулятор Валют</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>💱 Калькулятор Валют</h1>
+
+        <!-- Блок 1: Покупка валюты -->
+        <div class="block">
+            <div class="block-title">Покупка валюты</div>
+            
+            <div class="input-group">
+                <div class="input-label">Цена за 1 USD</div>
+                <div class="checkbox-group">
+                    <span>Новые доллары</span>
+                    <input type="checkbox" id="newUsd" onchange="calculate(); updateConversion()">
+                </div>
+                <div class="input-wrapper">
+                    <input type="text" inputmode="decimal" pattern="[0-9]+([.,][0-9]+)?" id="usdPrice" placeholder="Цена покупки 1 USD" step="0.01" oninput="calculate()">
+                    <span class="currency-symbol">₽</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-label">Цена за 1 EUR</div>
+                <div class="input-wrapper">
+                    <input type="text" inputmode="decimal" pattern="[0-9]+([.,][0-9]+)?" id="eurPrice" placeholder="Цена покупки 1 EUR" step="0.01" oninput="calculate()">
+                    <span class="currency-symbol">₽</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок 2: Биржевой курс -->
+        <div class="block">
+            <div class="block-title">Биржевой курс</div>
+            
+            <div class="input-group">
+                <div class="input-label">USD → VND (рынок)</div>
+                <div class="input-wrapper">
+                    <input type="text" pattern="[0-9]*" id="marketUsdVnd" placeholder="-" oninput="formatAndCalculate(this); calculate()">
+                    <span class="currency-symbol">₫</span>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-label">EUR → VND (рынок)</div>
+                <div class="input-wrapper">
+                    <input type="text" pattern="[0-9]*" id="marketEurVnd" placeholder="-" oninput="formatAndCalculate(this); calculate()">
+                    <span class="currency-symbol">₫</span>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick="fetchRates()" style="flex: 1;">Подтянуть</button>
+                <button class="clear-button" onclick="clearMarketRates()" style="flex: 1;">Сбросить</button>
+            </div>
+        </div>
+
+        <!-- Блок 3: Обменный курс -->
+        <div class="block">
+            <div class="block-title">Обменный курс</div>
+            
+            <div class="input-group">
+                <div class="input-label">USD → VND (новые доллары)</div>
+                <div class="input-wrapper">
+                    <input type="text" pattern="[0-9]*" id="exchangeUsdVndNew" placeholder="Количество VND за 1 новый USD" oninput="formatAndCalculate(this); calculate()">
+                    <span class="currency-symbol">₫</span>
+                </div>
+                <div id="diffUsdNew" class="difference-info" style="display: none;"></div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-label">USD → VND (старые доллары)</div>
+                <div class="input-wrapper">
+                    <input type="text" pattern="[0-9]*" id="exchangeUsdVndOld" placeholder="Количество VND за 1 старый USD" oninput="formatAndCalculate(this); calculate()">
+                    <span class="currency-symbol">₫</span>
+                </div>
+                <div id="diffUsdOld" class="difference-info" style="display: none;"></div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-label">EUR → VND</div>
+                <div class="input-wrapper">
+                    <input type="text" pattern="[0-9]*" id="exchangeEurVnd" placeholder="Количество VND за 1 EUR" oninput="formatAndCalculate(this); calculate()">
+                    <span class="currency-symbol">₫</span>
+                </div>
+                <div id="diffEur" class="difference-info" style="display: none;"></div>
+            </div>
+        </div>
+
+<!-- Блок 4: Конвертирование -->
+<div class="block" id="conversionBlock">
+    <div class="block-title">Конвертирование VND ↔ RUB</div>
+    <div class="radio-group">
+        <span>Приобретенная валюта:</span>
+        <label>
+            <input type="radio" name="currency" value="USD" checked onchange="handleCurrencyChange()">
+            USD
+        </label>
+        <label>
+            <input type="radio" name="currency" value="EUR" onchange="handleCurrencyChange()">
+            EUR
+        </label>
+    </div>
+    <div class="input-group">
+        <div class="input-label">Количество рублей</div>
+        <div class="input-wrapper">
+            <input type="text" pattern="[0-9]*" id="rubAmount" placeholder="Количество RUB" 
+                   oninput="formatNumber(this); setLastActive('rub'); convertRubToVnd(); calculateDifference()"
+                   onfocus="setLastActive('rub')">
+            <span class="currency-symbol">₽</span>
+        </div>
+    </div>
+    <div class="input-group">
+        <div class="input-label">Количество донгов</div>
+        <div class="input-wrapper">
+            <input type="text" pattern="[0-9]*" id="vndAmount" placeholder="Количество VND" 
+                   oninput="formatNumber(this); setLastActive('vnd'); convertVndToRub(); calculateDifference()"
+                   onfocus="setLastActive('vnd')">
+            <span class="currency-symbol">₫</span>
+        </div>
+    </div>
+    <div class="button-row">
+        <button onclick="clearConversion()" class="conversion-button">Сброс</button>
+        <button onclick="clearAll()" class="conversion-button">Сбросить всё</button>
+        <button onclick="toggleCalculatorMode()" class="conversion-button" id="toggleModeButton">Оставить только конвертор</button>
+    </div>
+</div>
+<!-- Блок 5: Разница -->
+<div class="block" id="differenceBlock">
+    <div class="block-title">Разница</div>
+    <div id="differenceResult" class="result-block">
+        Введите данные для расчета
+    </div>
+</div>
+
+<!-- Калькуляторный режим (скрыт по умолчанию) -->
+<div class="calculator-mode" id="calculatorMode" style="display: none;">
+    <div class="calculator-header">
+        <div id="calculatorDifferenceResult" class="result-block" style="margin-bottom: 15px; display: none;">
+            Введите данные для расчета
+        </div>
+        <div class="input-field-container">
+            <div class="input-field" id="vndCalculatorField">
+                <span class="currency-icon">₫</span>
+                <div class="input-value" id="vndCalculatorValue">0</div>
+            </div>
+            <div class="exchange-icon-container">
+                <div class="exchange-icon" onclick="swapValues()">⇵</div>
+            </div>
+            <div class="input-field" id="rubCalculatorField">
+                <span class="currency-icon">₽</span>
+                <div class="input-value" id="rubCalculatorValue">0</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="calculator-keypad">
+        <!-- Первая строка кнопок -->
+        <div class="keypad-row">
+            <button class="key action-key" onclick="backspace()">⌫</button>
+            <button class="key action-key" onclick="clearActiveField()">C</button>
+            <button class="key action-key" onclick="clearAllFields()">AC</button>
+            <button class="key math-key" onclick="addOperator('/')">÷</button>
+        </div>
+        <!-- Вторая строка кнопок -->
+        <div class="keypad-row">
+            <button class="key digit-key" onclick="addDigit(7)">7</button>
+            <button class="key digit-key" onclick="addDigit(8)">8</button>
+            <button class="key digit-key" onclick="addDigit(9)">9</button>
+            <button class="key math-key" onclick="addOperator('*')">×</button>
+        </div>
+        <!-- Третья строка кнопок -->
+        <div class="keypad-row">
+            <button class="key digit-key" onclick="addDigit(4)">4</button>
+            <button class="key digit-key" onclick="addDigit(5)">5</button>
+            <button class="key digit-key" onclick="addDigit(6)">6</button>
+            <button class="key math-key" onclick="addOperator('-')">−</button>
+        </div>
+        <!-- Четвертая строка кнопок -->
+        <div class="keypad-row">
+            <button class="key digit-key" onclick="addDigit(1)">1</button>
+            <button class="key digit-key" onclick="addDigit(2)">2</button>
+            <button class="key digit-key" onclick="addDigit(3)">3</button>
+            <button class="key math-key" onclick="addOperator('+')">+</button>
+        </div>
+        <!-- Пятая строка кнопок -->
+        <div class="keypad-row">
+            <button class="key action-key exchange-currency" onclick="toggleCurrency()">
+                <div class="currency-exchange">
+                    <div class="front">USD</div>
+                    <div class="back">EUR</div>
+                </div>
+            </button>
+            <button class="key digit-key" onclick="addDigit(0)">0</button>
+            <button class="key digit-key" onclick="addDigit('.')">,</button>
+            <button class="key math-key" onclick="calculateExpression()">=</button>
+        </div>
+    </div>
+    
+    <div class="calculator-footer">
+        <button onclick="clearAll()" class="conversion-button">Сбросить все</button>
+        <button onclick="toggleCalculatorMode()" class="conversion-button">Показать всё</button>
+    </div>
+    
+    <!-- Скрытые поля для калькулятора -->
+    <input type="hidden" id="activeCalculatorField" value="vnd">
+    <input type="hidden" id="currentExpression" value="">
+    <input type="hidden" id="currentCurrency" value="USD">
+    <input type="hidden" id="calculatorLastActive" value="vnd">
+</div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>
