@@ -831,8 +831,9 @@ document.querySelectorAll('input').forEach(input => {
       } else {
         const valueToStore = input.value;
         const keyToStoe = input.key;
-            if (keyToStoe !== 'EUR' || keyToStoe !== 'USD' || valueToStore !== 'EUR' || valueToStore !== 'USD' ) {
             localStorage.setItem(input.id, valueToStore);
+            if (keyToStoe == 'EUR' || keyToStoe == 'USD' || valueToStore == 'EUR' || valueToStore == 'USD' ) {
+                localStorage.removeItem(valueToStore);
          }
         }
     });
