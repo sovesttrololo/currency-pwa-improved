@@ -130,7 +130,8 @@
             
             if (price && exchangeRate) {
                 const rub = vnd / exchangeRate * price;
-                document.getElementById('rubAmount').value = rub.toFixed(2).replace('.', ',');
+                document.getElementById('rubAmount').value = rub.toLocaleString('ru-RU');
+            
             }
         }
 
