@@ -355,7 +355,9 @@
             <div class="input-group">
                 <div class="input-label">Количество рублей</div>
                 <div class="input-wrapper">
-                    <input type="text" pattern="[0-9]*" id="rubAmount" placeholder="Количество RUB" oninput="formatNumber(this); convertRubToVnd()">
+                    <input type="text" pattern="[0-9]*" id="rubAmount" placeholder="Количество RUB" 
+                           oninput="formatNumber(this); setLastActive('rub'); convertRubToVnd(); calculateDifference()"
+                           onfocus="setLastActive('rub')">
                     <span class="currency-symbol">₽</span>
                 </div>
             </div>
@@ -363,7 +365,9 @@
             <div class="input-group">
                 <div class="input-label">Количество донгов</div>
                 <div class="input-wrapper">
-                    <input type="text" pattern="[0-9]*" id="vndAmount" placeholder="Количество VND" oninput="formatNumber(this); convertVndToRub()">
+                    <input type="text" pattern="[0-9]*" id="vndAmount" placeholder="Количество VND" 
+                           oninput="formatNumber(this); setLastActive('vnd'); convertVndToRub(); calculateDifference()"
+                           onfocus="setLastActive('vnd')">
                     <span class="currency-symbol">₫</span>
                 </div>
             </div>
@@ -381,6 +385,9 @@
     </div>
 
     <script>
+        // Переменная для отслеживания последнего активного поля
+        let lastActiveField = 'rub'; // по умолчанию рубли
+
         // Service Worker registration for PWA
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').then(function(registration) {
@@ -388,6 +395,11 @@
             }).catch(function(err) {
                 console.log('ServiceWorker registration failed: ', err);
             });
+        }
+
+        // Установить последнее активное поле
+        function setLastActive(field) {
+            lastActiveField = field;
         }
 
         // Format number with thousands separator
@@ -401,6 +413,7 @@
         function formatAndCalculate(input) {
             formatNumber(input);
             calculate();
+            updateConversion(); // Добавлено для обновления конвертации при изменении курсов
         }
 
         // Get numeric value from formatted input
@@ -424,6 +437,7 @@
                 document.getElementById('marketEurVnd').value = eurToVnd.toLocaleString('ru-RU');
                 
                 calculate();
+                updateConversion(); // Обновить конвертацию после получения курсов
             } catch (error) {
                 alert('Не удалось загрузить курсы валют. Проверьте интернет-соединение.');
             }
@@ -434,19 +448,24 @@
             document.getElementById('marketUsdVnd').value = '';
             document.getElementById('marketEurVnd').value = '';
             calculate();
+            updateConversion(); // Обновить конвертацию после очистки
         }
 
         // Clear conversion fields
         function clearConversion() {
             document.getElementById('rubAmount').value = '';
             document.getElementById('vndAmount').value = '';
+            lastActiveField = 'rub'; // Сбросить к значению по умолчанию
+            calculateDifference(); // Пересчитать разницу
         }
 
         // Convert RUB to VND
         function convertRubToVnd() {
             const rub = getNumericValue('rubAmount');
             if (rub === 0) {
-                document.getElementById('vndAmount').value = '';
+                if (lastActiveField === 'rub') {
+                    document.getElementById('vndAmount').value = '';
+                }
                 return;
             }
 
@@ -475,7 +494,9 @@
         function convertVndToRub() {
             const vnd = getNumericValue('vndAmount');
             if (vnd === 0) {
-                document.getElementById('rubAmount').value = '';
+                if (lastActiveField === 'vnd') {
+                    document.getElementById('rubAmount').value = '';
+                }
                 return;
             }
 
@@ -550,14 +571,13 @@
 
         // Update conversion when currency or new USD checkbox changes
         function updateConversion() {
-            const rubAmount = document.getElementById('rubAmount').value;
-            const vndAmount = document.getElementById('vndAmount').value;
-            
-            if (rubAmount) {
+            // Пересчитываем значения в зависимости от последнего активного поля
+            if (lastActiveField === 'rub' && document.getElementById('rubAmount').value) {
                 convertRubToVnd();
-            } else if (vndAmount) {
+            } else if (lastActiveField === 'vnd' && document.getElementById('vndAmount').value) {
                 convertVndToRub();
             }
+            calculateDifference(); // Обязательно пересчитываем разницу
         }
 
         // Calculate difference between USD and EUR
@@ -567,14 +587,19 @@
             
             const usdPrice = getNumericValue('usdPrice');
             const eurPrice = getNumericValue('eurPrice');
-            const rubOrVnd = getNumericValue('rubAmount') || getNumericValue('vndAmount');
+            const rubAmount = getNumericValue('rubAmount');
+            const vndAmount = getNumericValue('vndAmount');
             
             let usdExchange = isNewUsd ? getNumericValue('exchangeUsdVndNew') : getNumericValue('exchangeUsdVndOld');
             const eurExchange = getNumericValue('exchangeEurVnd');
             
-            if (usdPrice && eurPrice && usdExchange && eurExchange && rubOrVnd) {
-                const baseAmount = getNumericValue('rubAmount') || 
-                    (getNumericValue('vndAmount') / (isUsd ? usdExchange : eurExchange) * (isUsd ? usdPrice : eurPrice));
+            // Используем любое из заполненных значений для расчета
+            const hasRubOrVnd = rubAmount > 0 || vndAmount > 0;
+            
+            if (usdPrice && eurPrice && usdExchange && eurExchange && hasRubOrVnd) {
+                // Определяем базовую сумму в рублях
+                const baseAmount = rubAmount > 0 ? rubAmount : 
+                    (vndAmount / (isUsd ? usdExchange : eurExchange) * (isUsd ? usdPrice : eurPrice));
                 
                 const vndViaUsd = baseAmount / usdPrice * usdExchange;
                 const vndViaEur = baseAmount / eurPrice * eurExchange;
