@@ -837,13 +837,18 @@ function restoreSelectedCurrency() {
   
 // При вводе сохраняем значение поля
 document.querySelectorAll('input').forEach(input => {
-    input.addEventListener('input', () => {
-        const valueToStore = input.value;
+    const eventType = input.type === 'checkbox' ? 'change' : 'input';
+    input.addEventListener(eventType, () => {
+        if (input.type === 'checkbox') {
+        localStorage.setItem(input.id, input.checked);
+      } else {
+        const valueToStore = input.key;
          if (valueToStore !== null && valueToStore !== undefined && valueToStore.trim() !== '') {
              localStorage.setItem(input.id, input.value);
          } else {
         localStorage.removeItem(input.id);
       }
+        }
     });
 });
 
@@ -853,12 +858,19 @@ document.querySelectorAll('input[name="currency"]').forEach(radio => {
 
 // При загрузке страницы восстанавливаем значения
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('input').forEach(input => {
+  document.querySelectorAll('input').forEach(input => {      
       const savedValue = localStorage.getItem(input.id);
+      if (input.type === 'checkbox') {
+          input.checked = savedValue === 'true';
+        } else {
       if (savedValue !== null) {
         input.value = savedValue;
       }
+      }
   });
+    calculate();
+  updateConversion();
+  calculateDifference();
 });
   // Инициализация при загрузке
   handleCurrencyChange();
