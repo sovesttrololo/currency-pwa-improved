@@ -315,53 +315,10 @@
     margin-bottom: 20px;
 }
 
-.keypad-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 10px;
-}
-
-.key {
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    border: none;
-    font-size: 18px;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
 
 .key:active {
     transform: scale(0.95);
     opacity: 0.8;
-}
-
-.digit-key {
-    background-color: #f0f0f0;
-    color: #333;
-}
-
-.math-key {
-    background-color: #ff9500;
-    color: white;
-}
-
-.action-key {
-    background-color: #e0e0e0;
-    color: #333;
-}
-
-.exchange-currency {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    position: relative;
-    overflow: hidden;
 }
 
 .currency-exchange {
@@ -432,11 +389,6 @@ input[type=number] {
 }
 
 /* Для мобильных устройств */
-@media (max-width: 480px) {
-    .input-field {
-        font-size: 24px;
-    }
-    
     .key {
         width: 45px;
         height: 45px;
@@ -454,6 +406,64 @@ input[type=number] {
     
     .button-row .conversion-button {
         width: 100%;
+    }
+}
+			/* Новые стили для калькулятора */
+.calculator-keypad {
+    margin-top: 20px;
+}
+
+.keypad-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.key {
+    width: calc(25% - 6px);
+    height: 50px;
+    border-radius: 8px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.action-key {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.digit-key {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.math-key {
+    background-color: #ff9500;
+    color: white;
+}
+
+.exchange-currency {
+    background: transparent;
+    padding: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.exchange-currency svg {
+    transform: translateX(-2px);
+}
+
+/* Для мобильных устройств */
+@media (max-width: 480px) {
+    .key {
+        font-size: 16px;
     }
 }
         }
