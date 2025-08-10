@@ -134,15 +134,15 @@
             }
         }
 
-function exchangeDiff(market, exchange, prise) {
+       function exchangeDiff(market, exchange, prise, element) {
              if (market && exchange && prise) {
                 const diff = market - exchange;
                 const rubDiff = diff / (exchange / prise);
-                document.getElementById('diffUsdNew').style.display = 'block';
-                document.getElementById('diffUsdNew').innerHTML = 
+                document.getElementById(element).style.display = 'block';
+                document.getElementById(element).innerHTML = 
                     `Разница c биржевым курсом: ${diff.toLocaleString('ru-RU')} ₫ ≈ ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
             } else {
-                document.getElementById('diffUsdNew').style.display = 'none';
+                document.getElementById('element').style.display = 'none';
             }          
         }
 
@@ -153,18 +153,18 @@ function exchangeDiff(market, exchange, prise) {
             const marketEur = getNumericValue('marketEurVnd');
             const usdPrice = getNumericValue('usdPrice');
             const eurPrice = getNumericValue('eurPrice');
-            
-            // USD New difference - corrected formula
             const exchangeUsdNew = getNumericValue('exchangeUsdVndNew');
-         exchangeDiff(marketUsd,exchangeUsdNew,usdPrice);    
-            
-            // USD Old difference - corrected formula
             const exchangeUsdOld = getNumericValue('exchangeUsdVndOld');
-         exchangeDiff(marketUsd,exchangeUsdOld,usdPrice);
-            
-            // EUR difference - corrected formula
             const exchangeEur = getNumericValue('exchangeEurVnd');
-         exchangeDiff(marketEur,exchangeEur,eurPrice);
+            
+            // USD New difference - corrected formula            
+            exchangeDiff(marketUsd,exchangeUsdNew,usdPrice,'diffUsdNew');    
+            
+            // USD Old difference - corrected formula            
+            exchangeDiff(marketUsd,exchangeUsdOld,usdPrice, 'diffUsdOld');
+            
+            // EUR difference - corrected formula     
+            exchangeDiff(marketEur,exchangeEur,eurPrice, 'diffEur');
             
             // Calculate overall difference
             calculateDifference();
