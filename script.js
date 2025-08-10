@@ -227,3 +227,20 @@
             // Set default values for testing
             // Remove these lines in production
         });
+
+// При вводе сохраняем значение поля
+document.querySelectorAll('input').forEach(input => {
+  input.addEventListener('input', () => {
+    localStorage.setItem(input.id, input.value);
+  });
+});
+
+// При загрузке страницы восстанавливаем значения
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('input').forEach(input => {
+    const savedValue = localStorage.getItem(input.id);
+    if (savedValue !== null) {
+      input.value = savedValue;
+    }
+  });
+});
