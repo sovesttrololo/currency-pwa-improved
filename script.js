@@ -847,10 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Инициализация при загрузке
   handleCurrencyChange();
   
-  // Добавляем обработчики для радиокнопок
-  document.querySelectorAll('input[name="currency"]').forEach(radio => {
-    radio.addEventListener('change', handleCurrencyChange);
-  });
+  
   
   // Добавляем обработчик для чекбокса новых долларов
   const newUsdCheckbox = document.getElementById('newUsd');
