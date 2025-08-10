@@ -1,37 +1,35 @@
-const CACHE_NAME = 'currency-calc-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json'
+const CACHE = 'vnd-rub-cache-v1';
+const OFFLINE_FILES = [
+  '.',
+  'index.html',
+  'manifest.json'
 ];
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(cache => cache.addAll(OFFLINE_FILES))
   );
+  self.skipWaiting();
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Возвращаем кэшированную версию или делаем запрос
-        return response || fetch(event.request);
-      })
-  );
+self.addEventListener('activate', e => {
+  e.waitUntil(self.clients.claim());
 });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.filter(cacheName => {
-          return cacheName !== CACHE_NAME;
-        }).map(cacheName => {
-          return caches.delete(cacheName);
-        })
-      );
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(cached => {
+      return cached || fetch(e.request).then(resp => {
+        // cache new GET requests (simple strategy)
+        if (e.request.method === 'GET' && resp && resp.status === 200 && resp.type === 'basic') {
+          const copy = resp.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+        }
+        return resp;
+      }).catch(() => {
+        // offline fallback: for navigation return index.html
+        if (e.request.mode === 'navigate') return caches.match('index.html');
+      });
     })
   );
 });
