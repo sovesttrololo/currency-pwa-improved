@@ -303,6 +303,11 @@ function toggleCalculatorMode() {
 
 // Создание HTML калькулятора
 function createCalculator() {
+    // Проверяем, не создан ли калькулятор уже
+    if (document.getElementById('calculatorMode')) {
+        return;
+    }
+
     const calculatorHTML = `
     <!-- Калькуляторный режим (скрыт по умолчанию) -->
     <div class="calculator-mode" id="calculatorMode" style="display: none;">
@@ -383,114 +388,52 @@ function createCalculator() {
     
     // Добавляем обработчики событий после создания элементов
     setTimeout(() => {
-        if (document.getElementById('vndCalculatorField')) {
-            document.getElementById('vndCalculatorField').addEventListener('click', () => {
-                setActiveCalculatorField('vnd');
-            });
-        }
-        if (document.getElementById('rubCalculatorField')) {
-            document.getElementById('rubCalculatorField').addEventListener('click', () => {
-                setActiveCalculatorField('rub');
-            });
-        }
-        if (document.getElementById('exchangeIcon')) {
-            document.getElementById('exchangeIcon').addEventListener('click', swapValues);
-        }
+        // Поля ввода
+        const vndField = document.getElementById('vndCalculatorField');
+        const rubField = document.getElementById('rubCalculatorField');
+        const exchangeIcon = document.getElementById('exchangeIcon');
+        
+        if (vndField) vndField.addEventListener('click', () => setActiveCalculatorField('vnd'));
+        if (rubField) rubField.addEventListener('click', () => setActiveCalculatorField('rub'));
+        if (exchangeIcon) exchangeIcon.addEventListener('click', swapValues);
         
         // Кнопки калькулятора
-        if (document.getElementById('backspaceBtn')) {
-            document.getElementById('backspaceBtn').addEventListener('click', backspace);
-        }
-        if (document.getElementById('clearActiveBtn')) {
-            document.getElementById('clearActiveBtn').addEventListener('click', clearActiveField);
-        }
-        if (document.getElementById('clearAllBtn')) {
-            document.getElementById('clearAllBtn').addEventListener('click', clearAllFields);
-        }
-        if (document.getElementById('divideBtn')) {
-            document.getElementById('divideBtn').addEventListener('click', () => addOperator('/'));
-        }
-        if (document.getElementById('multiplyBtn')) {
-            document.getElementById('multiplyBtn').addEventListener('click', () => addOperator('*'));
-        }
-        if (document.getElementById('subtractBtn')) {
-            document.getElementById('subtractBtn').addEventListener('click', () => addOperator('-'));
-        }
-        if (document.getElementById('addBtn')) {
-            document.getElementById('addBtn').addEventListener('click', () => addOperator('+'));
-        }
-        if (document.getElementById('digit7Btn')) {
-            document.getElementById('digit7Btn').addEventListener('click', () => addDigit('7'));
-        }
-        if (document.getElementById('digit8Btn')) {
-            document.getElementById('digit8Btn').addEventListener('click', () => addDigit('8'));
-        }
-        if (document.getElementById('digit9Btn')) {
-            document.getElementById('digit9Btn').addEventListener('click', () => addDigit('9'));
-        }
-        if (document.getElementById('digit4Btn')) {
-            document.getElementById('digit4Btn').addEventListener('click', () => addDigit('4'));
-        }
-        if (document.getElementById('digit5Btn')) {
-            document.getElementById('digit5Btn').addEventListener('click', () => addDigit('5'));
-        }
-        if (document.getElementById('digit6Btn')) {
-            document.getElementById('digit6Btn').addEventListener('click', () => addDigit('6'));
-        }
-        if (document.getElementById('digit1Btn')) {
-            document.getElementById('digit1Btn').addEventListener('click', () => addDigit('1'));
-        }
-        if (document.getElementById('digit2Btn')) {
-            document.getElementById('digit2Btn').addEventListener('click', () => addDigit('2'));
-        }
-        if (document.getElementById('digit3Btn')) {
-            document.getElementById('digit3Btn').addEventListener('click', () => addDigit('3'));
-        }
-        if (document.getElementById('digit0Btn')) {
-            document.getElementById('digit0Btn').addEventListener('click', () => addDigit('0'));
-        }
-        if (document.getElementById('decimalBtn')) {
-            document.getElementById('decimalBtn').addEventListener('click', () => addDigit('.'));
-        }
-        if (document.getElementById('equalsBtn')) {
-            document.getElementById('equalsBtn').addEventListener('click', calculateExpression);
-        }
-        if (document.getElementById('currencyToggleButton')) {
-            document.getElementById('currencyToggleButton').addEventListener('click', toggleCurrency);
-        }
+        const buttons = {
+            'backspaceBtn': backspace,
+            'clearActiveBtn': clearActiveField,
+            'clearAllBtn': clearAllFields,
+            'divideBtn': () => addOperator('/'),
+            'multiplyBtn': () => addOperator('*'),
+            'subtractBtn': () => addOperator('-'),
+            'addBtn': () => addOperator('+'),
+            'digit7Btn': () => addDigit('7'),
+            'digit8Btn': () => addDigit('8'),
+            'digit9Btn': () => addDigit('9'),
+            'digit4Btn': () => addDigit('4'),
+            'digit5Btn': () => addDigit('5'),
+            'digit6Btn': () => addDigit('6'),
+            'digit1Btn': () => addDigit('1'),
+            'digit2Btn': () => addDigit('2'),
+            'digit3Btn': () => addDigit('3'),
+            'digit0Btn': () => addDigit('0'),
+            'decimalBtn': () => addDigit('.'),
+            'equalsBtn': calculateExpression,
+            'currencyToggleButton': toggleCurrency
+        };
+        
+        Object.keys(buttons).forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.addEventListener('click', buttons[id]);
+        });
         
         // Кнопки в футере
-        if (document.getElementById('clearAllFooterBtn')) {
-            document.getElementById('clearAllFooterBtn').addEventListener('click', clearAll);
-        }
-        if (document.getElementById('showAllFooterBtn')) {
-            document.getElementById('showAllFooterBtn').addEventListener('click', toggleCalculatorMode);
-        }
-    }, 100); // Небольшая задержка для уверенности в создании DOM
-}
-
-// Инициализация калькуляторного режима
-function initCalculatorMode() {
-    const vndValue = document.getElementById('vndAmount').value.replace(/\s/g, '') || '0';
-    const rubValue = document.getElementById('rubAmount').value.replace(/\s/g, '') || '0';
-    
-    if (document.getElementById('vndCalculatorValue')) {
-        document.getElementById('vndCalculatorValue').textContent = formatDisplayValue(vndValue);
-    }
-    if (document.getElementById('rubCalculatorValue')) {
-        document.getElementById('rubCalculatorValue').textContent = formatDisplayValue(rubValue);
-    }
-    
-    const activeField = lastActiveField === 'vnd' ? 'vnd' : 'rub';
-    setActiveCalculatorField(activeField);
-    
-    const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
-    if (document.getElementById('currentCurrency')) {
-        document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
-    }
-    updateCurrencyButton();
-    
-    calculateDifference();
+        const clearAllFooterBtn = document.getElementById('clearAllFooterBtn');
+        const showAllFooterBtn = document.getElementById('showAllFooterBtn');
+        
+        if (clearAllFooterBtn) clearAllFooterBtn.addEventListener('click', clearAll);
+        if (showAllFooterBtn) showAllFooterBtn.addEventListener('click', toggleCalculatorMode);
+        
+    }, 0); // Немедленное выполнение после создания DOM
 }
 
 // Обновление калькулятора из основного экрана
