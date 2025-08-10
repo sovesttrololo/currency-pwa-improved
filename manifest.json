@@ -1,12 +1,12 @@
 {
-  "name": "Калькулятор Валют",
-  "short_name": "Валюты",
-  "description": "Калькулятор обмена валют RUB-VND",
-  "start_url": "/",
+  "name": "Currency Calculator",
+  "short_name": "CurrencyCalc",
+  "start_url": "/currency-pwa-improved/index.html",
+  "scope": "/currency-pwa-improved/",
   "display": "standalone",
-  "background_color": "#667eea",
-  "theme_color": "#1a1a2e",
-  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#2b2b2b",
+  "description": "Калькулятор обмена валют RUB-VND",
   "icons": [
     {
       "src": "icon-192.png",
