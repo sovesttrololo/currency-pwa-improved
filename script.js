@@ -821,16 +821,6 @@ function updateMainFields() {
     handleCurrencyChange(); // Используем обновленный обработчик
 }
 
-// При вводе сохраняем значение поля, кроме полей биржевого курса
-document.querySelectorAll('input').forEach(input => {
-  // Поля биржевого курса (marketUsdVnd, marketEurVnd) не сохраняем в localStorage
-  if (input.id !== 'marketUsdVnd' && input.id !== 'marketEurVnd') {
-    input.addEventListener('input', () => {
-      localStorage.setItem(input.id, input.value);
-    });
-  }
-});
-
 // При загрузке страницы восстанавливаем значения, кроме полей биржевого курса
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('input').forEach(input => {
@@ -844,10 +834,22 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
   
+// При вводе сохраняем значение поля, кроме полей биржевого курса
+document.querySelectorAll('input').forEach(input => {
+  // Поля биржевого курса (marketUsdVnd, marketEurVnd) не сохраняем в localStorage
+  if (input.id !== 'marketUsdVnd' && input.id !== 'marketEurVnd') {
+    input.addEventListener('input', () => {
+      localStorage.setItem(input.id, input.value);
+    });
+  }
+});
   // Инициализация при загрузке
   handleCurrencyChange();
   
-  
+    // Добавляем обработчики для радиокнопок
+  document.querySelectorAll('input[name="currency"]').forEach(radio => {
+    radio.addEventListener('change', handleCurrencyChange);
+  });
   
   // Добавляем обработчик для чекбокса новых долларов
   const newUsdCheckbox = document.getElementById('newUsd');
