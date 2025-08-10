@@ -302,7 +302,7 @@ function toggleCalculatorMode() {
     }
 }
 
-    
+    function createCalculator() {
     // Добавляем обработчики событий после создания элементов
     setTimeout(() => {
         if (document.getElementById('vndCalculatorField')) {
