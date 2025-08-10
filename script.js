@@ -142,7 +142,7 @@
                 document.getElementById(element).innerHTML = 
                     `Разница c биржевым курсом: ${diff.toLocaleString('ru-RU')} ₫ ≈ ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
             } else {
-                document.getElementById('element').style.display = 'none';
+                document.getElementById(element).style.display = 'none';
             }          
         }
 
