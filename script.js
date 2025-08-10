@@ -272,22 +272,45 @@ function toggleCalculatorMode() {
     const conversionBlock = document.getElementById('conversionBlock');
     const differenceBlock = document.getElementById('differenceBlock');
     const toggleButton = document.getElementById('toggleModeButton');
-    
+
+    // Проверки на null для основных элементов
+    if (!conversionBlock || !differenceBlock || !toggleButton) {
+        console.error("Основные элементы для переключения режима не найдены!");
+        return;
+    }
+
     isCalculatorMode = !isCalculatorMode;
-    
+
     if (isCalculatorMode) {
         // Если калькулятор еще не создан, создаем его
-        if (!document.getElementById('calculatorMode')) {
+        if (!calculatorMode) {
             createCalculator();
+            // Планируем переключение режима после создания
+            // Используем setTimeout с 0, чтобы дать браузеру время обработать DOM
+            setTimeout(() => {
+                const newlyCreatedCalculator = document.getElementById('calculatorMode');
+                if (newlyCreatedCalculator) {
+                    newlyCreatedCalculator.style.display = 'flex';
+                    conversionBlock.style.display = 'none';
+                    differenceBlock.style.display = 'none';
+                    toggleButton.textContent = 'Показать всё';
+                    initCalculatorMode();
+                    calculatorInitialized = true;
+                } else {
+                    console.error("Калькулятор не был создан или не найден после создания!");
+                }
+            }, 10); // Небольшая задержка
+        } else {
+            // Если калькулятор уже существует
+            calculatorMode.style.display = 'flex';
+            conversionBlock.style.display = 'none';
+            differenceBlock.style.display = 'none';
+            toggleButton.textContent = 'Показать всё';
+            initCalculatorMode();
+            calculatorInitialized = true;
         }
-        calculatorMode.style.display = 'flex';
-        conversionBlock.style.display = 'none';
-        differenceBlock.style.display = 'none';
-        toggleButton.textContent = 'Показать всё';
-        
-        initCalculatorMode();
-        calculatorInitialized = true;
     } else {
+        // Выход из режима калькулятора
         if (calculatorMode) {
             calculatorMode.style.display = 'none';
         }
@@ -295,7 +318,6 @@ function toggleCalculatorMode() {
         differenceBlock.style.display = 'block';
         toggleButton.textContent = 'Оставить только конвертор';
         calculatorInitialized = false;
-        
         // Скроллим вниз
         window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
     }
