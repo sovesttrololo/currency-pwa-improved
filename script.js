@@ -838,7 +838,7 @@ function restoreSelectedCurrency() {
 // При вводе сохраняем значение поля
 document.querySelectorAll('input').forEach(input => {
     input.addEventListener('input', () => {
-        const valueToStore = input.key;
+        const valueToStore = input.value;
          if (valueToStore !== null && valueToStore !== undefined && valueToStore.trim() !== '') {
              localStorage.setItem(input.id, input.value);
          } else {
