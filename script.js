@@ -845,7 +845,7 @@ document.querySelectorAll('input').forEach(input => {
         const valueToStore = input.value;
         const keyToStoe = input.key;
             localStorage.setItem(input.id, valueToStore);
-         if (keyToStoe == null  || keyToStoe == undefined) {
+         if (keyToStoe == null && keyToStoe == undefined && keyToStoe.trim() == '') {
              localStorage.removeItem(input.id);
          }
         }
