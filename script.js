@@ -609,85 +609,83 @@ document.addEventListener('DOMContentLoaded', () => {
     updateConversion();
     calculateDifference();
   });
-});
-
-// Добавим HTML калькулятора в конец body
-document.addEventListener('DOMContentLoaded', function() {
-    const calculatorHTML = `
-    <!-- Калькуляторный режим (скрыт по умолчанию) -->
-    <div class="calculator-mode" id="calculatorMode" style="display: none;">
-        <div class="calculator-header">
-            <div id="calculatorDifferenceResult" class="result-block" style="margin-bottom: 15px;">
-                Введите данные для расчета
-            </div>
-            <div class="input-field-container">
-                <div class="input-field" id="vndCalculatorField">
-                    <span class="currency-icon">₫</span>
-                    <div class="input-value" id="vndCalculatorValue" contenteditable="false">0</div>
-                </div>
-                <div class="exchange-icon-container">
-                    <div class="exchange-icon" onclick="swapValues()">⇵</div>
-                </div>
-                <div class="input-field" id="rubCalculatorField">
-                    <span class="currency-icon">₽</span>
-                    <div class="input-value" id="rubCalculatorValue" contenteditable="false">0</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="calculator-keypad">
-            <!-- Первая строка кнопок -->
-            <div class="keypad-row">
-                <button class="key action-key" onclick="backspace()">⌫</button>
-                <button class="key action-key" onclick="clearActiveField()">C</button>
-                <button class="key action-key" onclick="clearAllFields()">AC</button>
-                <button class="key math-key" onclick="addOperator('/')">÷</button>
-            </div>
-            <!-- Вторая строка кнопок -->
-            <div class="keypad-row">
-                <button class="key digit-key" onclick="addDigit(7)">7</button>
-                <button class="key digit-key" onclick="addDigit(8)">8</button>
-                <button class="key digit-key" onclick="addDigit(9)">9</button>
-                <button class="key math-key" onclick="addOperator('*')">×</button>
-            </div>
-            <!-- Третья строка кнопок -->
-            <div class="keypad-row">
-                <button class="key digit-key" onclick="addDigit(4)">4</button>
-                <button class="key digit-key" onclick="addDigit(5)">5</button>
-                <button class="key digit-key" onclick="addDigit(6)">6</button>
-                <button class="key math-key" onclick="addOperator('-')">−</button>
-            </div>
-            <!-- Четвертая строка кнопок -->
-            <div class="keypad-row">
-                <button class="key digit-key" onclick="addDigit(1)">1</button>
-                <button class="key digit-key" onclick="addDigit(2)">2</button>
-                <button class="key digit-key" onclick="addDigit(3)">3</button>
-                <button class="key math-key" onclick="addOperator('+')">+</button>
-            </div>
-            <!-- Пятая строка кнопок -->
-            <div class="keypad-row">
-                <button class="key action-key exchange-currency" onclick="toggleCurrency()" id="currencyToggleButton">
-                    USD => VND
-                </button>
-                <button class="key digit-key" onclick="addDigit(0)">0</button>
-                <button class="key digit-key" onclick="addDigit('.')">,</button>
-                <button class="key math-key" onclick="calculateExpression()">=</button>
-            </div>
-        </div>
-        
-        <div class="calculator-footer">
-            <button onclick="clearAll()" class="conversion-button-calculator">Сбросить все</button>
-            <button onclick="toggleCalculatorMode()" class="conversion-button-calculator">Показать всё</button>
-        </div>
-        
-        <!-- Скрытые поля для калькулятора -->
-        <input type="hidden" id="activeCalculatorField" value="vnd">
-        <input type="hidden" id="currentExpression" value="">
-        <input type="hidden" id="currentCurrency" value="USD">
-        <input type="hidden" id="calculatorLastActive" value="vnd">
-        <input type="hidden" id="calculatorState" value='{"currentInput":"0","operator":null,"firstValue":null,"waitingForSecondValue":false}'>
-    </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', calculatorHTML);
+  
+  // Добавим HTML калькулятора в конец body
+  const calculatorHTML = `
+  <!-- Калькуляторный режим (скрыт по умолчанию) -->
+  <div class="calculator-mode" id="calculatorMode" style="display: none;">
+      <div class="calculator-header">
+          <div id="calculatorDifferenceResult" class="result-block" style="margin-bottom: 15px;">
+              Введите данные для расчета
+          </div>
+          <div class="input-field-container">
+              <div class="input-field" id="vndCalculatorField">
+                  <span class="currency-icon">₫</span>
+                  <div class="input-value" id="vndCalculatorValue" contenteditable="false">0</div>
+              </div>
+              <div class="exchange-icon-container">
+                  <div class="exchange-icon" onclick="swapValues()">⇵</div>
+              </div>
+              <div class="input-field" id="rubCalculatorField">
+                  <span class="currency-icon">₽</span>
+                  <div class="input-value" id="rubCalculatorValue" contenteditable="false">0</div>
+              </div>
+          </div>
+      </div>
+      
+      <div class="calculator-keypad">
+          <!-- Первая строка кнопок -->
+          <div class="keypad-row">
+              <button class="key action-key" onclick="backspace()">⌫</button>
+              <button class="key action-key" onclick="clearActiveField()">C</button>
+              <button class="key action-key" onclick="clearAllFields()">AC</button>
+              <button class="key math-key" onclick="addOperator('/')">÷</button>
+          </div>
+          <!-- Вторая строка кнопок -->
+          <div class="keypad-row">
+              <button class="key digit-key" onclick="addDigit(7)">7</button>
+              <button class="key digit-key" onclick="addDigit(8)">8</button>
+              <button class="key digit-key" onclick="addDigit(9)">9</button>
+              <button class="key math-key" onclick="addOperator('*')">×</button>
+          </div>
+          <!-- Третья строка кнопок -->
+          <div class="keypad-row">
+              <button class="key digit-key" onclick="addDigit(4)">4</button>
+              <button class="key digit-key" onclick="addDigit(5)">5</button>
+              <button class="key digit-key" onclick="addDigit(6)">6</button>
+              <button class="key math-key" onclick="addOperator('-')">−</button>
+          </div>
+          <!-- Четвертая строка кнопок -->
+          <div class="keypad-row">
+              <button class="key digit-key" onclick="addDigit(1)">1</button>
+              <button class="key digit-key" onclick="addDigit(2)">2</button>
+              <button class="key digit-key" onclick="addDigit(3)">3</button>
+              <button class="key math-key" onclick="addOperator('+')">+</button>
+          </div>
+          <!-- Пятая строка кнопок -->
+          <div class="keypad-row">
+              <button class="key action-key exchange-currency" onclick="toggleCurrency()" id="currencyToggleButton">
+                  USD => VND
+              </button>
+              <button class="key digit-key" onclick="addDigit(0)">0</button>
+              <button class="key digit-key" onclick="addDigit('.')">,</button>
+              <button class="key math-key" onclick="calculateExpression()">=</button>
+          </div>
+      </div>
+      
+      <div class="calculator-footer">
+          <button onclick="clearAll()" class="conversion-button-calculator">Сбросить все</button>
+          <button onclick="toggleCalculatorMode()" class="conversion-button-calculator">Показать всё</button>
+      </div>
+      
+      <!-- Скрытые поля для калькулятора -->
+      <input type="hidden" id="activeCalculatorField" value="vnd">
+      <input type="hidden" id="currentExpression" value="">
+      <input type="hidden" id="currentCurrency" value="USD">
+      <input type="hidden" id="calculatorLastActive" value="vnd">
+      <input type="hidden" id="calculatorState" value='{"currentInput":"0","operator":null,"firstValue":null,"waitingForSecondValue":false}'>
+  </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', calculatorHTML);
 });
