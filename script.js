@@ -842,9 +842,10 @@ document.querySelectorAll('input').forEach(input => {
         if (input.type === 'checkbox') {
         localStorage.setItem(input.id, input.checked);
       } else {
-        const valueToStore = input.key;
-         if (valueToStore !== null && valueToStore !== undefined && valueToStore.trim() !== '') {
-             localStorage.setItem(input.id, input.value);
+        const valueToStore = input.value;
+        const keyToStoe = input.key;
+         if (valueToStore || keyToStoe !== null && valueToStore || keyToStoe !== undefined && valueToStore.trim() || keyToStoe.trim() !== '') {
+             localStorage.setItem(input.id, valueToStore);
          } else {
         localStorage.removeItem(input.id);
       }
