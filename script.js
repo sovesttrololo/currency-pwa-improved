@@ -794,3 +794,66 @@ function updateCurrencyButton() {
 
 // Обновление основных полей из калькулятора
 function updateMainFields() {
+    const vndElement = document.getElementById('vndCalculatorValue');
+    const rubElement = document.getElementById('rubCalculatorValue');
+    const lastActiveElement = document.getElementById('calculatorLastActive');
+    
+    if (!vndElement || !rubElement) return;
+    
+    const vndValue = formatCalcValue(vndElement.textContent);
+    const rubValue = formatCalcValue(rubElement.textContent);
+    
+    document.getElementById('vndAmount').value = vndValue === '0' ? '' : formatDisplayValue(vndValue);
+    document.getElementById('rubAmount').value = rubValue === '0' ? '' : formatDisplayValue(rubValue);
+    
+    if (lastActiveElement) {
+        lastActiveField = lastActiveElement.value;
+    }
+    
+    handleCurrencyChange(); // Используем обновленный обработчик
+}
+
+// При вводе сохраняем значение поля
+document.querySelectorAll('input').forEach(input => {
+  input.addEventListener('input', () => {
+    localStorage.setItem(input.id, input.value);
+  });
+});
+
+// При загрузке страницы восстанавливаем значения
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('input').forEach(input => {
+    const savedValue = localStorage.getItem(input.id);
+    if (savedValue !== null) {
+      input.value = savedValue;
+    }
+  });
+  
+  // Добавляем обработчик для клика на полях калькулятора (если они уже есть)
+  // Это нужно на случай, если калькулятор был создан ранее (например, при перезагрузке в режиме калькулятора)
+  if (document.getElementById('vndCalculatorField')) {
+    document.getElementById('vndCalculatorField').addEventListener('click', () => {
+        setActiveCalculatorField('vnd');
+    });
+  }
+  
+  if (document.getElementById('rubCalculatorField')) {
+    document.getElementById('rubCalculatorField').addEventListener('click', () => {
+        setActiveCalculatorField('rub');
+    });
+  }
+  
+  // Инициализация при загрузке
+  handleCurrencyChange();
+  
+  // Добавляем обработчики для радиокнопок
+  document.querySelectorAll('input[name="currency"]').forEach(radio => {
+    radio.addEventListener('change', handleCurrencyChange);
+  });
+  
+  // Добавляем обработчик для чекбокса новых долларов
+  const newUsdCheckbox = document.getElementById('newUsd');
+  if (newUsdCheckbox) {
+    newUsdCheckbox.addEventListener('change', handleCurrencyChange);
+  }
+});
