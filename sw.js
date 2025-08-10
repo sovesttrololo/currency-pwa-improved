@@ -1,5 +1,4 @@
-const CACHE_NAME = 'currency-calc-v1';
-
+const CACHE_NAME = 'currency-calc-v2'; // Изменена версия кэша
 const urlsToCache = [
   './',
   './index.html',
@@ -7,7 +6,8 @@ const urlsToCache = [
   './styles.css',
   './script.js',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './favicon.ico'
 ];
 
 // Установка Service Worker и кэширование файлов
@@ -23,26 +23,50 @@ self.addEventListener('install', event => {
 // Активация и очистка старого кэша
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => 
-      Promise.all(keys.map(key => {
-        if (key !== CACHE_NAME) {
-          return caches.delete(key);
-        }
-      }))
-    )
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Удаление старого кэша:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
   self.clients.claim();
 });
 
-// Обработка запросов — сначала сеть, потом кэш
+// Обработка запросов - сначала сеть, потом кэш (Network First для HTML/JS/CSS)
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        return response;
-      })
-      .catch(() => caches.match(event.request))
-  );
+  // Для HTML, CSS, JS файлов используем Network First стратегию
+  if (event.request.destination === 'document' || 
+      event.request.destination === 'script' || 
+      event.request.destination === 'style') {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // Клонируем ответ для кэширования
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME)
+            .then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+          return response;
+        })
+        .catch(() => {
+          // Если сеть недоступна, берем из кэша
+          return caches.match(event.request);
+        })
+    );
+  } else {
+    // Для других ресурсов (изображения и т.д.) используем Cache First
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => {
+          // Возвращаем кэшированную версию или загружаем из сети
+          return response || fetch(event.request);
+        })
+    );
+  }
 });
