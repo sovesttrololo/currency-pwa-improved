@@ -99,22 +99,20 @@
             </div>
         </div>
 
-        <!-- Блок 4: Конвертирование -->
-        <div class="block">
+                <!-- Блок 4: Конвертирование -->
+        <div class="block" id="conversionBlock">
             <div class="block-title">Конвертирование VND ↔ RUB</div>
-            
             <div class="radio-group">
                 <span>Приобретенная валюта:</span>
                 <label>
-                    <input type="radio" name="currency" value="USD" checked onchange="calculate(); updateConversion()">
+                    <input type="radio" name="currency" value="USD" checked onchange="handleCurrencyChange()">
                     USD
                 </label>
                 <label>
-                    <input type="radio" name="currency" value="EUR" onchange="calculate(); updateConversion()">
+                    <input type="radio" name="currency" value="EUR" onchange="handleCurrencyChange()">
                     EUR
                 </label>
             </div>
-
             <div class="input-group">
                 <div class="input-label">Количество рублей</div>
                 <div class="input-wrapper">
@@ -124,7 +122,6 @@
                     <span class="currency-symbol">₽</span>
                 </div>
             </div>
-
             <div class="input-group">
                 <div class="input-label">Количество донгов</div>
                 <div class="input-wrapper">
@@ -134,12 +131,14 @@
                     <span class="currency-symbol">₫</span>
                 </div>
             </div>
-
-            <button onclick="clearConversion()" style="width: auto;">Сброс</button>
+            <div class="button-row">
+                <button onclick="clearConversion()" class="conversion-button">Сброс</button>
+                <button onclick="clearAll()" class="conversion-button">Сбросить всё</button>
+                <button onclick="toggleCalculatorMode()" class="conversion-button" id="toggleModeButton">Оставить только конвертор</button>
+            </div>
         </div>
-
         <!-- Блок 5: Разница -->
-        <div class="block">
+        <div class="block" id="differenceBlock">
             <div class="block-title">Разница</div>
             <div id="differenceResult" class="result-block">
                 Введите данные для расчета
