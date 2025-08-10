@@ -511,8 +511,8 @@
             // USD New difference - corrected formula
             const exchangeUsdNew = getNumericValue('exchangeUsdVndNew');
             if (marketUsd && exchangeUsdNew && usdPrice) {
-                const diff = exchangeUsdNew - marketUsd;
-                const rubDiff = diff * (exchangeUsdNew / usdPrice);
+                const diff = marketUsd - exchangeUsdNew;
+                const rubDiff = diff / (exchangeUsdNew / usdPrice);
                 document.getElementById('diffUsdNew').style.display = 'block';
                 document.getElementById('diffUsdNew').innerHTML = 
                     `Разница: ${diff.toLocaleString('ru-RU')} ₫ = ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
@@ -523,8 +523,8 @@
             // USD Old difference - corrected formula
             const exchangeUsdOld = getNumericValue('exchangeUsdVndOld');
             if (marketUsd && exchangeUsdOld && usdPrice) {
-                const diff = exchangeUsdOld - marketUsd;
-                const rubDiff = diff * (exchangeUsdOld / usdPrice);
+                const diff = marketUsd - exchangeUsdOld;
+                const rubDiff = diff / (exchangeUsdOld / usdPrice);
                 document.getElementById('diffUsdOld').style.display = 'block';
                 document.getElementById('diffUsdOld').innerHTML = 
                     `Разница: ${diff.toLocaleString('ru-RU')} ₫ = ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
@@ -535,8 +535,8 @@
             // EUR difference - corrected formula
             const exchangeEur = getNumericValue('exchangeEurVnd');
             if (marketEur && exchangeEur && eurPrice) {
-                const diff = exchangeEur - marketEur;
-                const rubDiff = diff * (exchangeEur / eurPrice);
+                const diff = marketEur - exchangeEur;
+                const rubDiff = diff / (exchangeEur / eurPrice);
                 document.getElementById('diffEur').style.display = 'block';
                 document.getElementById('diffEur').innerHTML = 
                     `Разница: ${diff.toLocaleString('ru-RU')} ₫ = ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
