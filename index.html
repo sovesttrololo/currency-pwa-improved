@@ -320,7 +320,7 @@
             <div class="input-group">
                 <div class="input-label">USD → VND (старые доллары)</div>
                 <div class="input-wrapper">
-                    <input type="tel" pattern="[0-9]*" id="exchangeUsdVndOld" placeholder="Количество VND за 1 старый USD" oninput="formatAndCalculate(this); calculate()">
+                    <input type="number" pattern="[0-9]+" id="exchangeUsdVndOld" placeholder="Количество VND за 1 старый USD" oninput="formatAndCalculate(this); calculate()">
                     <span class="currency-symbol">₫</span>
                 </div>
                 <div id="diffUsdOld" class="difference-info" style="display: none;"></div>
