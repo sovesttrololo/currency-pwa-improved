@@ -1,6 +1,7 @@
 // Переменная для отслеживания последнего активного поля
 let lastActiveField = 'rub'; // по умолчанию рубли
 let isCalculatorMode = false; // Флаг режима калькулятора
+let calculatorInitialized = false; // Флаг инициализации калькулятора
 
 // Service Worker registration for PWA
 if ('serviceWorker' in navigator) {
@@ -70,7 +71,7 @@ function clearConversion() {
     calculateDifference(); // Пересчитать разницу
     
     // Если в калькуляторном режиме, обновить его
-    if (isCalculatorMode) {
+    if (isCalculatorMode && calculatorInitialized) {
         initCalculatorMode();
     }
 }
@@ -92,7 +93,7 @@ function clearAll() {
     calculateDifference();
     
     // Если в калькуляторном режиме, обновить его
-    if (isCalculatorMode) {
+    if (isCalculatorMode && calculatorInitialized) {
         initCalculatorMode();
     }
 }
@@ -219,8 +220,18 @@ function calculateDifference() {
             ${Math.abs(Math.round(difference)).toLocaleString('ru-RU')} ₫ ⟹ 
             ${rubDifference.toFixed(2).replace('.', ',')} ₽, 
             если бы обмен был ${altCurrency}`;
+            
+        // Обновляем блок разницы в калькуляторном режиме, если он активен
+        if (isCalculatorMode && calculatorInitialized) {
+            document.getElementById('calculatorDifferenceResult').innerHTML = document.getElementById('differenceResult').innerHTML;
+            document.getElementById('calculatorDifferenceResult').style.display = 'block';
+        }
     } else {
         document.getElementById('differenceResult').innerHTML = 'Введите данные для расчета';
+        if (isCalculatorMode && calculatorInitialized) {
+            document.getElementById('calculatorDifferenceResult').innerHTML = 'Введите данные для расчета';
+            document.getElementById('calculatorDifferenceResult').style.display = 'block';
+        }
     }
 }
 
@@ -242,23 +253,25 @@ function toggleCalculatorMode() {
         
         // Инициализируем калькулятор
         initCalculatorMode();
+        calculatorInitialized = true;
     } else {
         // Возвращаемся к обычному режиму
         calculatorMode.style.display = 'none';
         conversionBlock.style.display = 'block';
         differenceBlock.style.display = 'block';
         toggleButton.textContent = 'Оставить только конвертор';
+        calculatorInitialized = false;
     }
 }
 
 // Инициализация калькуляторного режима
 function initCalculatorMode() {
     // Копируем значения из обычных полей
-    const vndValue = document.getElementById('vndAmount').value.replace(/\s/g, '');
-    const rubValue = document.getElementById('rubAmount').value.replace(/\s/g, '');
+    const vndValue = document.getElementById('vndAmount').value.replace(/\s/g, '') || '0';
+    const rubValue = document.getElementById('rubAmount').value.replace(/\s/g, '') || '0';
     
-    document.getElementById('vndCalculatorValue').textContent = vndValue || '0';
-    document.getElementById('rubCalculatorValue').textContent = rubValue || '0';
+    document.getElementById('vndCalculatorValue').textContent = vndValue === '' ? '0' : vndValue;
+    document.getElementById('rubCalculatorValue').textContent = rubValue === '' ? '0' : rubValue;
     
     // Устанавливаем активное поле
     const activeField = lastActiveField === 'vnd' ? 'vnd' : 'rub';
@@ -268,6 +281,9 @@ function initCalculatorMode() {
     const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
     document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
     updateCurrencyExchangeButton();
+    
+    // Обновляем блок разницы
+    calculateDifference();
 }
 
 // Установка активного поля в калькуляторе
@@ -279,19 +295,33 @@ function setActiveCalculatorField(field) {
     document.getElementById('rubCalculatorField').classList.toggle('active', field === 'rub');
 }
 
-// Добавление цифры
+// Добавление цифры или оператора
 function addDigit(digit) {
     const field = document.getElementById('activeCalculatorField').value;
     const display = document.getElementById(`${field}CalculatorValue`);
     let value = display.textContent;
     
-    // Удаляем "0" если это первая цифра
+    // Если текущее значение - результат, сбрасываем его
+    if (value.startsWith('=')) {
+        value = '0';
+    }
+    
+    // Удаляем "0" если это первая цифра и не точка
     if (value === '0' && digit !== '.') {
         value = '';
     }
     
     // Добавляем цифру
     if (digit === '.' && value.includes('.')) return; // Не добавляем вторую точку
+    
+    // Если текущее выражение не пустое, добавляем в выражение
+    const currentExpression = document.getElementById('currentExpression').value;
+    if (currentExpression !== '') {
+        document.getElementById('currentExpression').value = '';
+        display.textContent = '0';
+        value = '0';
+    }
+    
     display.textContent = value + digit;
     
     // Обновляем основные поля
@@ -305,6 +335,11 @@ function addOperator(operator) {
     const currentExpression = document.getElementById('currentExpression').value;
     let value = display.textContent;
     
+    // Если текущее значение - результат, используем его как начальное значение
+    if (value.startsWith('=')) {
+        value = value.substring(1);
+    }
+    
     // Формируем выражение
     let expression = currentExpression;
     if (expression === '' || expression.endsWith(' ')) {
@@ -314,7 +349,9 @@ function addOperator(operator) {
     }
     
     document.getElementById('currentExpression').value = expression;
-    display.textContent = '0';
+    
+    // Отображаем выражение в поле
+    display.textContent = expression;
 }
 
 // Вычисление выражения
@@ -335,15 +372,20 @@ function calculateExpression() {
         const result = eval(calcExpression);
         
         // Отображаем результат
-        display.textContent = formatCalculatorResult(result);
+        const formattedResult = formatCalculatorResult(result);
+        display.textContent = '=' + formattedResult;
         document.getElementById('currentExpression').value = '';
         
         // Обновляем основные поля
         updateMainFields();
+        
+        // Пересчитываем разницу
+        calculateDifference();
     } catch (e) {
         display.textContent = 'Ошибка';
         setTimeout(() => {
             display.textContent = '0';
+            document.getElementById('currentExpression').value = '';
         }, 1500);
     }
 }
@@ -373,6 +415,9 @@ function swapValues() {
     
     // Обновляем основные поля
     updateMainFields();
+    
+    // Пересчитываем разницу
+    calculateDifference();
 }
 
 // Удаление последнего символа
@@ -380,6 +425,12 @@ function backspace() {
     const field = document.getElementById('activeCalculatorField').value;
     const display = document.getElementById(`${field}CalculatorValue`);
     let value = display.textContent;
+    
+    // Если текущее значение - результат, сбрасываем его
+    if (value.startsWith('=')) {
+        value = value.substring(1);
+        display.textContent = value;
+    }
     
     if (value.length > 1) {
         display.textContent = value.slice(0, -1);
@@ -408,6 +459,9 @@ function clearAllFields() {
     
     // Обновляем основные поля
     updateMainFields();
+    
+    // Пересчитываем разницу
+    calculateDifference();
 }
 
 // Переключение валюты (USD/EUR)
@@ -432,6 +486,7 @@ function toggleCurrency() {
     // Пересчитываем значения
     calculate();
     updateConversion();
+    calculateDifference();
 }
 
 // Обновление текста кнопки валют
@@ -446,11 +501,11 @@ function updateCurrencyExchangeButton() {
 
 // Обновление основных полей из калькулятора
 function updateMainFields() {
-    const vndValue = document.getElementById('vndCalculatorValue').textContent.replace(/\s/g, '');
-    const rubValue = document.getElementById('rubCalculatorValue').textContent.replace(/\s/g, '');
+    const vndValue = document.getElementById('vndCalculatorValue').textContent.replace(/\s/g, '').replace('=', '');
+    const rubValue = document.getElementById('rubCalculatorValue').textContent.replace(/\s/g, '').replace('=', '');
     
     // Обновляем основные поля
-    document.getElementById('vndAmount').value = vndValue === '0' ? '' : parseInt(vndValue).toLocaleString('ru-RU');
+    document.getElementById('vndAmount').value = vndValue === '0' ? '' : parseInt(vndValue.replace(/[^0-9]/g, '')).toLocaleString('ru-RU');
     document.getElementById('rubAmount').value = rubValue === '0' ? '' : parseFloat(rubValue).toLocaleString('ru-RU');
     
     // Пересчитываем
@@ -482,4 +537,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('rubCalculatorField').addEventListener('click', () => {
     setActiveCalculatorField('rub');
   });
+  
+  // Инициализация при загрузке
+  calculate();
+  updateConversion();
+  calculateDifference();
 });

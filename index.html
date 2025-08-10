@@ -148,14 +148,21 @@
 <!-- Калькуляторный режим (скрыт по умолчанию) -->
 <div class="calculator-mode" id="calculatorMode" style="display: none;">
     <div class="calculator-header">
-        <div class="input-field" id="vndCalculatorField">
-            <span class="currency-icon">₫</span>
-            <div class="input-value" id="vndCalculatorValue">0</div>
+        <div class="input-field-container">
+            <div class="input-field" id="vndCalculatorField">
+                <span class="currency-icon">₫</span>
+                <div class="input-value" id="vndCalculatorValue">0</div>
+            </div>
+            <div class="exchange-icon-container">
+                <div class="exchange-icon" onclick="swapValues()">⇵</div>
+            </div>
+            <div class="input-field" id="rubCalculatorField">
+                <span class="currency-icon">₽</span>
+                <div class="input-value" id="rubCalculatorValue">0</div>
+            </div>
         </div>
-        <div class="exchange-icon" onclick="swapValues()">⇵</div>
-        <div class="input-field" id="rubCalculatorField">
-            <span class="currency-icon">₽</span>
-            <div class="input-value" id="rubCalculatorValue">0</div>
+        <div id="calculatorDifferenceResult" class="result-block" style="margin-top: 10px; display: none;">
+            Введите данные для расчета
         </div>
     </div>
     

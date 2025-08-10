@@ -234,8 +234,7 @@
             input {
                 font-size: 16px !important;
             }
-        }
-/* Калькуляторный режим */
+			/* Калькуляторный режим */
 .calculator-mode {
     position: fixed;
     top: 0;
@@ -431,3 +430,88 @@
         width: 100%;
     }
 }
+/* Исправления для калькуляторного режима */
+.calculator-mode {
+    touch-action: manipulation; /* Предотвращает двойной тап для увеличения */
+    -webkit-tap-highlight-color: transparent;
+}
+
+.input-field-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+}
+
+.exchange-icon-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    background: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-field {
+    min-height: 40px !important;
+    padding: 8px 15px !important;
+    font-size: 28px !important;
+}
+
+.input-value {
+    min-height: auto !important;
+    font-size: 28px !important;
+    line-height: 1.2 !important;
+}
+
+.key {
+    border-radius: 12px !important;
+    aspect-ratio: auto !important;
+    height: 50px !important;
+    margin: 0 4px 8px !important;
+}
+
+.keypad-row {
+    gap: 8px !important;
+}
+
+/* Скрытие стандартной клавиатуры */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Отключение увеличения при двойном тапе */
+* {
+    touch-action: manipulation;
+}
+
+/* Для мобильных устройств */
+@media (max-width: 480px) {
+    .input-field {
+        font-size: 24px !important;
+    }
+    
+    .key {
+        height: 45px !important;
+    }
+    
+    .exchange-icon-container {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+        }
