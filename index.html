@@ -1,146 +1,582 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Калькулятор VND ↔ RUB</title>
-<link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#0a74da" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<link rel="apple-touch-icon" href="icons/icon-192.png" />
-<link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>Калькулятор Валют</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 15px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .block {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .block-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1a1a2e;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 12px 40px 12px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+
+        input::placeholder {
+            color: #aaa;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            right: 15px;
+            color: #666;
+            font-weight: 500;
+            pointer-events: none;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin: 10px 0;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .radio-group input[type="radio"] {
+            margin-right: 6px;
+            cursor: pointer;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 25%;
+            margin-left: 10px;
+        }
+
+        .input-with-buttons {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .input-with-buttons .input-wrapper {
+            flex: 1;
+        }
+
+        button {
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .clear-button {
+            background: #e74c3c;
+        }
+
+        .difference-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .result-block {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 16px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+        }
+
+        .savings { color: #27ae60; }
+        .losses { color: #e74c3c; }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 15px 10px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .block {
+                padding: 15px;
+            }
+        }
+
+        /* iOS specific styles */
+        @supports (-webkit-touch-callout: none) {
+            input {
+                font-size: 16px !important;
+            }
+        }
+    </style>
 </head>
 <body>
-  <main class="app">
-    <header class="topbar">
-      <h1>Калькулятор обмена</h1>
-      <p class="subtitle">VND ↔ RUB · реактивный конвертер</p>
-    </header>
+    <div class="container">
+        <h1>💱 Калькулятор Валют</h1>
 
-    <section class="cards">
-      <!-- My Prices -->
-      <section class="card">
-        <h2>Мои цены</h2>
-        <div class="grid two">
-          <div class="field inline">
-            <label>Цена за 1 USD</label>
-            <div class="input-with-postfix">
-              <input id="rubUsd" inputmode="decimal" placeholder="85,12" />
-              <span class="postfix">₽</span>
+        <!-- Блок 1: Покупка валюты -->
+        <div class="block">
+            <div class="block-title">Покупка валюты</div>
+            
+            <div class="input-group">
+                <div class="input-label">Цена за 1 USD</div>
+                <div class="checkbox-group">
+                    <span>Новые доллары</span>
+                    <input type="checkbox" id="newUsd" onchange="calculate()">
+                </div>
+                <div class="input-wrapper">
+                    <input type="number" id="usdPrice" placeholder="Цена покупки 1 USD" step="0.01" oninput="calculate()">
+                    <span class="currency-symbol">₽</span>
+                </div>
             </div>
-          </div>
-          <div class="field small-checkbox">
-            <label class="checkbox-inline">NEW USD? <input id="newUsd" type="checkbox" /></label>
-          </div>
-          <div class="field">
-            <label>Цена за 1 EUR</label>
-            <div class="input-with-postfix">
-              <input id="rubEur" inputmode="decimal" placeholder="90,12" />
-              <span class="postfix">₽</span>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      <!-- Market Rates -->
-      <section class="card">
-        <h2>Биржевой курс</h2>
-        <div class="grid three">
-          <div class="field">
-            <label>USD → VND (рынок)</label>
-            <div class="input-with-postfix">
-              <input id="usdVndMarket" readonly placeholder="—" />
-              <span class="postfix">₫</span>
+            <div class="input-group">
+                <div class="input-label">Цена за 1 EUR</div>
+                <div class="input-wrapper">
+                    <input type="number" id="eurPrice" placeholder="Цена покупки 1 EUR" step="0.01" oninput="calculate()">
+                    <span class="currency-symbol">₽</span>
+                </div>
             </div>
-          </div>
-          <div class="field">
-            <label>EUR → VND (рынок)</label>
-            <div class="input-with-postfix">
-              <input id="eurVndMarket" readonly placeholder="—" />
-              <span class="postfix">₫</span>
-            </div>
-          </div>
-          <div class="col actions">
-            <button id="fetchRates" class="btn">Подтянуть</button>
-            <button id="clearMarket" class="btn ghost">Очистить</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Exchange Rates (manual) -->
-      <section class="card">
-        <h2>Обменный курс (ручной)</h2>
-        <div class="grid three">
-          <div class="field">
-            <label>USD → VND (новые доллары)</label>
-            <div class="input-with-postfix">
-              <input id="usdVndNew" inputmode="numeric" placeholder="24000" />
-              <span class="postfix">₫</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>USD → VND (старые доллары)</label>
-            <div class="input-with-postfix">
-              <input id="usdVndOld" inputmode="numeric" placeholder="23900" />
-              <span class="postfix">₫</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>EUR → VND</label>
-            <div class="input-with-postfix">
-              <input id="eurVndManual" inputmode="numeric" placeholder="26000" />
-              <span class="postfix">₫</span>
-            </div>
-          </div>
-        </div>
-        <div id="marketDiff" class="muted small" style="margin-top:8px;display:none">Разница с биржевым: <span id="marketDiffText">—</span></div>
-      </section>
-
-      <!-- Converter -->
-      <section class="card">
-        <h2>Конвертер</h2>
-
-        <div class="field radio-group">
-          <div>Покупалась валюта:</div>
-          <label><input type="radio" name="currency" value="usd" id="radioUsd" checked /> USD</label>
-          <label><input type="radio" name="currency" value="eur" id="radioEur" /> EUR</label>
         </div>
 
-        <div class="grid two">
-          <div class="field">
-            <label>Рубли (₽)</label>
-            <div class="input-with-postfix">
-              <input id="amountRub" inputmode="decimal" placeholder="1000" />
-              <span class="postfix">₽</span>
+        <!-- Блок 2: Биржевой курс -->
+        <div class="block">
+            <div class="block-title">Биржевой курс</div>
+            
+            <div class="input-group">
+                <div class="input-label">USD → VND (рынок)</div>
+                <div class="input-with-buttons">
+                    <div class="input-wrapper">
+                        <input type="text" id="marketUsdVnd" placeholder="-" oninput="formatAndCalculate(this); calculate()">
+                        <span class="currency-symbol">₫</span>
+                    </div>
+                    <div class="button-group">
+                        <button onclick="fetchRates()">Подтянуть</button>
+                        <button class="clear-button" onclick="clearMarketRates()">Сбросить</button>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="field">
-            <label>Донги (₫)</label>
-            <div class="input-with-postfix">
-              <input id="amountVnd" inputmode="numeric" placeholder="24000000" />
-              <span class="postfix">₫</span>
+
+            <div class="input-group">
+                <div class="input-label">EUR → VND (рынок)</div>
+                <div class="input-wrapper">
+                    <input type="text" id="marketEurVnd" placeholder="-" oninput="formatAndCalculate(this); calculate()">
+                    <span class="currency-symbol">₫</span>
+                </div>
             </div>
-          </div>
         </div>
 
-        <div class="row">
-          <button id="convertBtn" class="btn primary">Пересчитать</button>
-          <button id="resetBtn" class="btn ghost">Сброс</button>
+        <!-- Блок 3: Обменный курс -->
+        <div class="block">
+            <div class="block-title">Обменный курс</div>
+            
+            <div class="input-group">
+                <div class="input-label">USD → VND (новые доллары)</div>
+                <div class="input-wrapper">
+                    <input type="text" id="exchangeUsdVndNew" placeholder="Количество VND за 1 новый USD" oninput="formatAndCalculate(this); calculate()">
+                    <span class="currency-symbol">₫</span>
+                </div>
+                <div id="diffUsdNew" class="difference-info" style="display: none;"></div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-label">USD → VND (старые доллары)</div>
+                <div class="input-wrapper">
+                    <input type="text" id="exchangeUsdVndOld" placeholder="Количество VND за 1 старый USD" oninput="formatAndCalculate(this); calculate()">
+                    <span class="currency-symbol">₫</span>
+                </div>
+                <div id="diffUsdOld" class="difference-info" style="display: none;"></div>
+            </div>
+
+            <div class="input-group">
+                <div class="input-label">EUR → VND</div>
+                <div class="input-wrapper">
+                    <input type="text" id="exchangeEurVnd" placeholder="Количество VND за 1 EUR" oninput="formatAndCalculate(this); calculate()">
+                    <span class="currency-symbol">₫</span>
+                </div>
+                <div id="diffEur" class="difference-info" style="display: none;"></div>
+            </div>
         </div>
 
-        <div class="result" id="out">—</div>
-        <div class="explain muted" id="explain"></div>
-      </section>
+        <!-- Блок 4: Конвертирование -->
+        <div class="block">
+            <div class="block-title">Конвертирование VND ↔ RUB</div>
+            
+            <div class="radio-group">
+                <span>Приобретенная валюта:</span>
+                <label>
+                    <input type="radio" name="currency" value="USD" checked onchange="calculate()">
+                    USD
+                </label>
+                <label>
+                    <input type="radio" name="currency" value="EUR" onchange="calculate()">
+                    EUR
+                </label>
+            </div>
 
-      <section class="card small">
-        <h2>Разница</h2>
-        <div id="diff" class="muted">—</div>
-      </section>
-    </section>
+            <div class="input-group">
+                <div class="input-label">Количество рублей</div>
+                <div class="input-wrapper">
+                    <input type="text" id="rubAmount" placeholder="Количество RUB" oninput="formatNumber(this); convertRubToVnd()">
+                    <span class="currency-symbol">₽</span>
+                </div>
+            </div>
 
-    <footer class="footer muted">Установите через «Поделиться → На экран «Домой»» в Safari.</footer>
-  </main>
+            <div class="input-group">
+                <div class="input-label">Количество донгов</div>
+                <div class="input-wrapper">
+                    <input type="text" id="vndAmount" placeholder="Количество VND" oninput="formatNumber(this); convertVndToRub()">
+                    <span class="currency-symbol">₫</span>
+                </div>
+            </div>
 
-<script src="script.js"></script>
+            <button onclick="clearConversion()" style="width: auto;">Сброс</button>
+        </div>
+
+        <!-- Блок 5: Разница -->
+        <div class="block">
+            <div class="block-title">Разница</div>
+            <div id="differenceResult" class="result-block">
+                Введите данные для расчета
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker registration for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(function(registration) {
+                console.log('ServiceWorker registered');
+            }).catch(function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        }
+
+        // Format number with thousands separator
+        function formatNumber(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value) {
+                input.value = parseInt(value).toLocaleString('ru-RU');
+            }
+        }
+
+        function formatAndCalculate(input) {
+            formatNumber(input);
+            calculate();
+        }
+
+        // Get numeric value from formatted input
+        function getNumericValue(id) {
+            const value = document.getElementById(id).value.replace(/[^\d.,]/g, '').replace(',', '.');
+            return parseFloat(value) || 0;
+        }
+
+        // Fetch exchange rates from API
+        async function fetchRates() {
+            try {
+                // Using exchangerate-api as it's free and doesn't require API key
+                const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+                const data = await response.json();
+                
+                const usdToVnd = Math.ceil(data.rates.VND);
+                const eurToUsd = data.rates.EUR;
+                const eurToVnd = Math.round(usdToVnd / eurToUsd);
+                
+                document.getElementById('marketUsdVnd').value = usdToVnd.toLocaleString('ru-RU');
+                document.getElementById('marketEurVnd').value = eurToVnd.toLocaleString('ru-RU');
+                
+                calculate();
+            } catch (error) {
+                alert('Не удалось загрузить курсы валют. Проверьте интернет-соединение.');
+            }
+        }
+
+        // Clear market rates
+        function clearMarketRates() {
+            document.getElementById('marketUsdVnd').value = '';
+            document.getElementById('marketEurVnd').value = '';
+            calculate();
+        }
+
+        // Clear conversion fields
+        function clearConversion() {
+            document.getElementById('rubAmount').value = '';
+            document.getElementById('vndAmount').value = '';
+        }
+
+        // Convert RUB to VND
+        function convertRubToVnd() {
+            const rub = getNumericValue('rubAmount');
+            if (rub === 0) {
+                document.getElementById('vndAmount').value = '';
+                return;
+            }
+
+            const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
+            const isNewUsd = document.getElementById('newUsd').checked;
+            
+            const usdPrice = getNumericValue('usdPrice');
+            const eurPrice = getNumericValue('eurPrice');
+            
+            let exchangeRate;
+            if (isUsd) {
+                exchangeRate = isNewUsd ? getNumericValue('exchangeUsdVndNew') : getNumericValue('exchangeUsdVndOld');
+            } else {
+                exchangeRate = getNumericValue('exchangeEurVnd');
+            }
+            
+            const price = isUsd ? usdPrice : eurPrice;
+            
+            if (price && exchangeRate) {
+                const vnd = Math.round(rub / price * exchangeRate);
+                document.getElementById('vndAmount').value = vnd.toLocaleString('ru-RU');
+            }
+        }
+
+        // Convert VND to RUB
+        function convertVndToRub() {
+            const vnd = getNumericValue('vndAmount');
+            if (vnd === 0) {
+                document.getElementById('rubAmount').value = '';
+                return;
+            }
+
+            const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
+            const isNewUsd = document.getElementById('newUsd').checked;
+            
+            const usdPrice = getNumericValue('usdPrice');
+            const eurPrice = getNumericValue('eurPrice');
+            
+            let exchangeRate;
+            if (isUsd) {
+                exchangeRate = isNewUsd ? getNumericValue('exchangeUsdVndNew') : getNumericValue('exchangeUsdVndOld');
+            } else {
+                exchangeRate = getNumericValue('exchangeEurVnd');
+            }
+            
+            const price = isUsd ? usdPrice : eurPrice;
+            
+            if (price && exchangeRate) {
+                const rub = vnd / exchangeRate * price;
+                document.getElementById('rubAmount').value = rub.toFixed(2).replace('.', ',');
+            }
+        }
+
+        // Main calculation function
+        function calculate() {
+            // Calculate differences for exchange rates
+            const marketUsd = getNumericValue('marketUsdVnd');
+            const marketEur = getNumericValue('marketEurVnd');
+            const usdPrice = getNumericValue('usdPrice');
+            const eurPrice = getNumericValue('eurPrice');
+            
+            // USD New difference
+            const exchangeUsdNew = getNumericValue('exchangeUsdVndNew');
+            if (marketUsd && exchangeUsdNew && usdPrice) {
+                const diff = marketUsd - exchangeUsdNew;
+                const rubDiff = (exchangeUsdNew / usdPrice) * diff;
+                document.getElementById('diffUsdNew').style.display = 'block';
+                document.getElementById('diffUsdNew').innerHTML = 
+                    `Разница: ${diff.toLocaleString('ru-RU')} ₫ = ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
+            } else {
+                document.getElementById('diffUsdNew').style.display = 'none';
+            }
+            
+            // USD Old difference
+            const exchangeUsdOld = getNumericValue('exchangeUsdVndOld');
+            if (marketUsd && exchangeUsdOld && usdPrice) {
+                const diff = marketUsd - exchangeUsdOld;
+                const rubDiff = (exchangeUsdOld / usdPrice) * diff;
+                document.getElementById('diffUsdOld').style.display = 'block';
+                document.getElementById('diffUsdOld').innerHTML = 
+                    `Разница: ${diff.toLocaleString('ru-RU')} ₫ = ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
+            } else {
+                document.getElementById('diffUsdOld').style.display = 'none';
+            }
+            
+            // EUR difference
+            const exchangeEur = getNumericValue('exchangeEurVnd');
+            if (marketEur && exchangeEur && eurPrice) {
+                const diff = marketEur - exchangeEur;
+                const rubDiff = (exchangeEur / eurPrice) * diff;
+                document.getElementById('diffEur').style.display = 'block';
+                document.getElementById('diffEur').innerHTML = 
+                    `Разница: ${diff.toLocaleString('ru-RU')} ₫ = ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
+            } else {
+                document.getElementById('diffEur').style.display = 'none';
+            }
+            
+            // Calculate overall difference
+            calculateDifference();
+        }
+
+        // Calculate difference between USD and EUR
+        function calculateDifference() {
+            const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
+            const isNewUsd = document.getElementById('newUsd').checked;
+            
+            const usdPrice = getNumericValue('usdPrice');
+            const eurPrice = getNumericValue('eurPrice');
+            const rubOrVnd = getNumericValue('rubAmount') || getNumericValue('vndAmount');
+            
+            let usdExchange = isNewUsd ? getNumericValue('exchangeUsdVndNew') : getNumericValue('exchangeUsdVndOld');
+            const eurExchange = getNumericValue('exchangeEurVnd');
+            
+            if (usdPrice && eurPrice && usdExchange && eurExchange && rubOrVnd) {
+                const baseAmount = getNumericValue('rubAmount') || 
+                    (getNumericValue('vndAmount') / (isUsd ? usdExchange : eurExchange) * (isUsd ? usdPrice : eurPrice));
+                
+                const vndViaUsd = baseAmount / usdPrice * usdExchange;
+                const vndViaEur = baseAmount / eurPrice * eurExchange;
+                
+                const difference = isUsd ? (vndViaUsd - vndViaEur) : (vndViaEur - vndViaUsd);
+                const rubDifference = Math.abs(difference / (isUsd ? vndViaUsd : vndViaEur) * baseAmount);
+                
+                const savingsOrLosses = difference < 0 ? 'Экономия' : 'Потери';
+                const altCurrency = isUsd ? 'EUR' : 'USD';
+                
+                document.getElementById('differenceResult').innerHTML = 
+                    `<span class="${difference < 0 ? 'savings' : 'losses'}">${savingsOrLosses}</span> 
+                    ${Math.abs(Math.round(difference)).toLocaleString('ru-RU')} ₫ ⟹ 
+                    ${rubDifference.toFixed(2).replace('.', ',')} ₽, 
+                    если бы обмен был ${altCurrency}`;
+            } else {
+                document.getElementById('differenceResult').innerHTML = 'Введите данные для расчета';
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default values for testing
+            // Remove these lines in production
+        });
+    </script>
 </body>
 </html>
