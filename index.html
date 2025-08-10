@@ -144,7 +144,6 @@
         Введите данные для расчета
     </div>
 </div>
-
 <!-- Калькуляторный режим (скрыт по умолчанию) -->
 <div class="calculator-mode" id="calculatorMode" style="display: none;">
     <div class="calculator-header">
@@ -198,10 +197,12 @@
         <!-- Пятая строка кнопок -->
         <div class="keypad-row">
             <button class="key action-key exchange-currency" onclick="toggleCurrency()">
-                <div class="currency-exchange">
-                    <div class="front">USD</div>
-                    <div class="back">EUR</div>
-                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#667eea"/>
+                    <path d="M12 22L2 17L12 12L22 17L12 22Z" fill="#764ba2"/>
+                    <path d="M2 7L12 12L22 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 17L12 12L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
             </button>
             <button class="key digit-key" onclick="addDigit(0)">0</button>
             <button class="key digit-key" onclick="addDigit('.')">,</button>
