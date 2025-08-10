@@ -283,6 +283,7 @@ function calculateDifference() {
 }
 
 // Переключение режима калькулятора
+// Переключение режима калькулятора
 function toggleCalculatorMode() {
     const calculatorMode = document.getElementById('calculatorMode');
     const conversionBlock = document.getElementById('conversionBlock');
@@ -308,6 +309,9 @@ function toggleCalculatorMode() {
         differenceBlock.style.display = 'block';
         toggleButton.textContent = 'Оставить только конвертор';
         calculatorInitialized = false;
+        
+        // Скроллим вниз
+        window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
     }
 }
 
@@ -599,6 +603,15 @@ function updateMainFields() {
     updateConversion();
     calculateDifference();
 }
+
+// Добавьте обработчики для полей ввода калькулятора
+document.getElementById('vndCalculatorValue').addEventListener('input', () => {
+    updateMainFields();
+});
+
+document.getElementById('rubCalculatorValue').addEventListener('input', () => {
+    updateMainFields();
+});
 
 // При вводе сохраняем значение поля
 document.querySelectorAll('input').forEach(input => {
