@@ -272,7 +272,7 @@
             <div class="input-group">
                 <div class="input-label">Цена за 1 EUR</div>
                 <div class="input-wrapper">
-                    <input type="number" id="eurPrice" placeholder="Цена покупки 1 EUR" step="0.01" oninput="calculate()">
+                    <input type="text" id="eurPrice" placeholder="Цена покупки 1 EUR" step="0.01" oninput="calculate()">
                     <span class="currency-symbol">₽</span>
                 </div>
             </div>
@@ -285,7 +285,7 @@
             <div class="input-group">
                 <div class="input-label">USD → VND (рынок)</div>
                 <div class="input-wrapper">
-                    <input type="number" "id="marketUsdVnd" placeholder="-" oninput="formatAndCalculate(this); calculate()">
+                    <input type="text" "id="marketUsdVnd" placeholder="-" oninput="formatAndCalculate(this); calculate()">
                     <span class="currency-symbol">₫</span>
                 </div>
             </div>
@@ -293,7 +293,7 @@
             <div class="input-group">
                 <div class="input-label">EUR → VND (рынок)</div>
                 <div class="input-wrapper">
-                    <input type="number" id="marketEurVnd" placeholder="-" oninput="formatAndCalculate(this); calculate()">
+                    <input type="text" id="marketEurVnd" placeholder="-" oninput="formatAndCalculate(this); calculate()">
                     <span class="currency-symbol">₫</span>
                 </div>
             </div>
@@ -311,7 +311,7 @@
             <div class="input-group">
                 <div class="input-label">USD → VND (новые доллары)</div>
                 <div class="input-wrapper">
-                    <input type="number" id="exchangeUsdVndNew" placeholder="Количество VND за 1 новый USD" oninput="formatAndCalculate(this); calculate()">
+                    <input type="text" id="exchangeUsdVndNew" placeholder="Количество VND за 1 новый USD" oninput="formatAndCalculate(this); calculate()">
                     <span class="currency-symbol">₫</span>
                 </div>
                 <div id="diffUsdNew" class="difference-info" style="display: none;"></div>
@@ -320,7 +320,7 @@
             <div class="input-group">
                 <div class="input-label">USD → VND (старые доллары)</div>
                 <div class="input-wrapper">
-                    <input type="number" id="exchangeUsdVndOld" placeholder="Количество VND за 1 старый USD" oninput="formatAndCalculate(this); calculate()">
+                    <input type="text" id="exchangeUsdVndOld" placeholder="Количество VND за 1 старый USD" oninput="formatAndCalculate(this); calculate()">
                     <span class="currency-symbol">₫</span>
                 </div>
                 <div id="diffUsdOld" class="difference-info" style="display: none;"></div>
@@ -329,7 +329,7 @@
             <div class="input-group">
                 <div class="input-label">EUR → VND</div>
                 <div class="input-wrapper">
-                    <input type="number" id="exchangeEurVnd" placeholder="Количество VND за 1 EUR" oninput="formatAndCalculate(this); calculate()">
+                    <input type="text" id="exchangeEurVnd" placeholder="Количество VND за 1 EUR" oninput="formatAndCalculate(this); calculate()">
                     <span class="currency-symbol">₫</span>
                 </div>
                 <div id="diffEur" class="difference-info" style="display: none;"></div>
@@ -355,7 +355,7 @@
             <div class="input-group">
                 <div class="input-label">Количество рублей</div>
                 <div class="input-wrapper">
-                    <input type="number" id="rubAmount" placeholder="Количество RUB" oninput="formatNumber(this); convertRubToVnd()">
+                    <input type="text" id="rubAmount" placeholder="Количество RUB" oninput="formatNumber(this); convertRubToVnd()">
                     <span class="currency-symbol">₽</span>
                 </div>
             </div>
@@ -363,7 +363,7 @@
             <div class="input-group">
                 <div class="input-label">Количество донгов</div>
                 <div class="input-wrapper">
-                    <input type="number" id="vndAmount" placeholder="Количество VND" oninput="formatNumber(this); convertVndToRub()">
+                    <input type="text" id="vndAmount" placeholder="Количество VND" oninput="formatNumber(this); convertVndToRub()">
                     <span class="currency-symbol">₫</span>
                 </div>
             </div>
