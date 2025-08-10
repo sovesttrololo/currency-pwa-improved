@@ -515,7 +515,7 @@
                 const rubDiff = diff / (exchangeUsdNew / usdPrice);
                 document.getElementById('diffUsdNew').style.display = 'block';
                 document.getElementById('diffUsdNew').innerHTML = 
-                    `Разница: ${diff.toLocaleString('ru-RU')} ₫ = ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
+                    `Разница c биржевым курсом: ${diff.toLocaleString('ru-RU')} ₫ ≈ ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
             } else {
                 document.getElementById('diffUsdNew').style.display = 'none';
             }
@@ -527,7 +527,7 @@
                 const rubDiff = diff / (exchangeUsdOld / usdPrice);
                 document.getElementById('diffUsdOld').style.display = 'block';
                 document.getElementById('diffUsdOld').innerHTML = 
-                    `Разница: ${diff.toLocaleString('ru-RU')} ₫ = ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
+                    `Разница c биржевым курсом: ${diff.toLocaleString('ru-RU')} ₫ ≈ ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
             } else {
                 document.getElementById('diffUsdOld').style.display = 'none';
             }
@@ -539,7 +539,7 @@
                 const rubDiff = diff / (exchangeEur / eurPrice);
                 document.getElementById('diffEur').style.display = 'block';
                 document.getElementById('diffEur').innerHTML = 
-                    `Разница: ${diff.toLocaleString('ru-RU')} ₫ = ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
+                    `Разница c биржевым курсом: ${diff.toLocaleString('ru-RU')} ₫ ≈ ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
             } else {
                 document.getElementById('diffEur').style.display = 'none';
             }
