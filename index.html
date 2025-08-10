@@ -99,50 +99,51 @@
             </div>
         </div>
 
-<!-- Блок 4: Конвертирование -->
-<div class="block" id="conversionBlock">
-    <div class="block-title">Конвертирование VND ↔ RUB</div>
-    <div class="radio-group">
-        <span>Приобретенная валюта:</span>
-        <label>
-            <input type="radio" name="currency" value="USD" checked onchange="handleCurrencyChange()">
-            USD
-        </label>
-        <label>
-            <input type="radio" name="currency" value="EUR" onchange="handleCurrencyChange()">
-            EUR
-        </label>
-    </div>
-    <div class="input-group">
-        <div class="input-label">Количество рублей</div>
-        <div class="input-wrapper">
-            <input type="text" pattern="[0-9]*" id="rubAmount" placeholder="Количество RUB" 
-                   oninput="formatNumber(this); setLastActive('rub'); convertRubToVnd(); calculateDifference()"
-                   onfocus="setLastActive('rub')">
-            <span class="currency-symbol">₽</span>
+        <!-- Блок 4: Конвертирование -->
+        <div class="block" id="conversionBlock">
+            <div class="block-title">Конвертирование VND ↔ RUB</div>
+            <div class="radio-group">
+                <span>Приобретенная валюта:</span>
+                <label>
+                    <input type="radio" name="currency" value="USD" checked onchange="handleCurrencyChange()">
+                    USD
+                </label>
+                <label>
+                    <input type="radio" name="currency" value="EUR" onchange="handleCurrencyChange()">
+                    EUR
+                </label>
+            </div>
+            <div class="input-group">
+                <div class="input-label">Количество рублей</div>
+                <div class="input-wrapper">
+                    <input type="text" pattern="[0-9]*" id="rubAmount" placeholder="Количество RUB" 
+                           oninput="formatNumber(this); setLastActive('rub'); convertRubToVnd(); calculateDifference()"
+                           onfocus="setLastActive('rub')">
+                    <span class="currency-symbol">₽</span>
+                </div>
+            </div>
+            <div class="input-group">
+                <div class="input-label">Количество донгов</div>
+                <div class="input-wrapper">
+                    <input type="text" pattern="[0-9]*" id="vndAmount" placeholder="Количество VND" 
+                           oninput="formatNumber(this); setLastActive('vnd'); convertVndToRub(); calculateDifference()"
+                           onfocus="setLastActive('vnd')">
+                    <span class="currency-symbol">₫</span>
+                </div>
+            </div>
+            <div class="button-row">
+                <button onclick="clearConversion()" class="conversion-button">Сброс</button>
+                <button onclick="clearAll()" class="conversion-button">Сбросить всё</button>
+                <button onclick="toggleCalculatorMode()" class="conversion-button" id="toggleModeButton">Оставить только конвертор</button>
+            </div>
         </div>
-    </div>
-    <div class="input-group">
-        <div class="input-label">Количество донгов</div>
-        <div class="input-wrapper">
-            <input type="text" pattern="[0-9]*" id="vndAmount" placeholder="Количество VND" 
-                   oninput="formatNumber(this); setLastActive('vnd'); convertVndToRub(); calculateDifference()"
-                   onfocus="setLastActive('vnd')">
-            <span class="currency-symbol">₫</span>
+        <!-- Блок 5: Разница -->
+        <div class="block" id="differenceBlock">
+            <div class="block-title">Разница</div>
+            <div id="differenceResult" class="result-block">
+                Введите данные для расчета
+            </div>
         </div>
-    </div>
-    <div class="button-row">
-        <button onclick="clearConversion()" class="conversion-button">Сброс</button>
-        <button onclick="clearAll()" class="conversion-button">Сбросить всё</button>
-        <button onclick="toggleCalculatorMode()" class="conversion-button" id="toggleModeButton">Оставить только конвертор</button>
-    </div>
-</div>
-<!-- Блок 5: Разница -->
-<div class="block" id="differenceBlock">
-    <div class="block-title">Разница</div>
-    <div id="differenceResult" class="result-block">
-        Введите данные для расчета
-    </div>
 
 <!-- Калькуляторный режим (скрыт по умолчанию) -->
 <div class="calculator-mode" id="calculatorMode" style="display: none;">
