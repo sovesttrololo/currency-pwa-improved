@@ -395,15 +395,20 @@
 .conversion-button {
     flex: 1;
     min-width: 100px;
-    padding: 12px;
+    padding: 8px;
     font-size: 14px;
 }
 
 /* Для мобильных устройств */
 @media (max-width: 480px) {
-    .input-field {
-        font-size: 24px;
+    .button-row {
+        flex-direction: column;
     }
+    
+    .button-row .conversion-button {
+        width: 100%;
+    }
+}
     
     .key {
         font-size: 16px;
@@ -416,8 +421,11 @@
     }
     
     .button-row {
-        flex-direction: column;
-    }
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
     
     .button-row .conversion-button {
         width: 100%;
