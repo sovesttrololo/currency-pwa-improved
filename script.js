@@ -857,4 +857,3 @@ document.addEventListener('DOMContentLoaded', () => {
   if (newUsdCheckbox) {
     newUsdCheckbox.addEventListener('change', handleCurrencyChange);
   }
-});
