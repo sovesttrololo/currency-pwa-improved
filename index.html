@@ -143,7 +143,8 @@
     <div id="differenceResult" class="result-block">
         Введите данные для расчета
     </div>
-</div><!-- Калькуляторный режим (скрыт по умолчанию) -->
+
+<!-- Калькуляторный режим (скрыт по умолчанию) -->
 <div class="calculator-mode" id="calculatorMode" style="display: none;">
     <div class="calculator-header">
         <div id="calculatorDifferenceResult" class="result-block" style="margin-bottom: 15px;">
@@ -152,14 +153,14 @@
         <div class="input-field-container">
             <div class="input-field" id="vndCalculatorField">
                 <span class="currency-icon">₫</span>
-                <div class="input-value" id="vndCalculatorValue" contenteditable="true">0</div>
+                <div class="input-value" id="vndCalculatorValue" contenteditable="false">0</div>
             </div>
             <div class="exchange-icon-container">
                 <div class="exchange-icon" onclick="swapValues()">⇵</div>
             </div>
             <div class="input-field" id="rubCalculatorField">
                 <span class="currency-icon">₽</span>
-                <div class="input-value" id="rubCalculatorValue" contenteditable="true">0</div>
+                <div class="input-value" id="rubCalculatorValue" contenteditable="false">0</div>
             </div>
         </div>
     </div>
@@ -214,8 +215,8 @@
     <input type="hidden" id="currentExpression" value="">
     <input type="hidden" id="currentCurrency" value="USD">
     <input type="hidden" id="calculatorLastActive" value="vnd">
+    <input type="hidden" id="calculatorState" value='{"currentInput":"0","operator":null,"firstValue":null,"waitingForSecondValue":false}'>
 </div>
-
     </div>
 
 <script src="script.js"></script>
