@@ -194,7 +194,6 @@ function handleCurrencyChange() {
     calculate();
     updateConversion();
     calculateDifference();
-    saveSelectedCurrency();
     
     // Обновляем калькулятор, если он активен
     if (isCalculatorMode && calculatorInitialized) {
@@ -822,18 +821,6 @@ function updateMainFields() {
     handleCurrencyChange(); // Используем обновленный обработчик
 }
 
-function saveSelectedCurrency() {
-    const selectedCurrency = document.querySelector('input[name="currency"]:checked').value;
-    localStorage.setItem('selectedCurrency', selectedCurrency);
-}
-
-// Восстанавливаем выбранную валюту из localStorage
-function restoreSelectedCurrency() {
-    const savedCurrency = localStorage.getItem('selectedCurrency');
-    if (savedCurrency) {
-        document.querySelector(`input[name="currency"][value="${savedCurrency}"]`).checked = true;
-    }
-}
   
 // При вводе сохраняем значение поля
 document.querySelectorAll('input').forEach(input => {
@@ -874,7 +861,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
   // Инициализация при загрузке
   handleCurrencyChange();
- restoreSelectedCurrency();
     // Добавляем обработчики для радиокнопок
   document.querySelectorAll('input[name="currency"]').forEach(radio => {
     radio.addEventListener('change', handleCurrencyChange);
