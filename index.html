@@ -393,8 +393,10 @@
         // Format number with thousands separator
         function formatNumber(input) {
             let value = input.value.replace(/\D/g, '');
-            const formattedValue = value.replace(/\B(?=(\d{3})+(?!\d))/g, ' '); 
-            input.value = formattedValue;
+            if (value) {
+                input.value = parseInt(value).toLocaleString('ru-RU');
+            }
+            
         }
 
         function formatAndCalculate(input) {
