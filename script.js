@@ -824,7 +824,7 @@ function updateMainFields() {
   
 // При вводе сохраняем значение поля
 document.querySelectorAll('input').forEach(input => {
-  if (input.id !== 'rubAmount' && input.id !== 'vndAmount') {
+  if (input.id !== 'newUsd' && input.id !== 'vndAmount') {
     input.addEventListener('input', () => {
       localStorage.setItem(input.id, input.value);
     });
@@ -834,7 +834,7 @@ document.querySelectorAll('input').forEach(input => {
 // При загрузке страницы восстанавливаем значения
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('input').forEach(input => {
-    if (input.id !== 'rubAmount' && input.id !== 'vndAmount') {
+    if (input.id !== 'newUsd' && input.id !== 'vndAmount') {
       const savedValue = localStorage.getItem(input.id);
       if (savedValue !== null) {
         input.value = savedValue;
