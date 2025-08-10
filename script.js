@@ -833,7 +833,7 @@ document.querySelectorAll('input').forEach(input => {
         const keyToStoe = input.key;
             localStorage.setItem(input.id, valueToStore);
             if (keyToStoe == 'EUR' || keyToStoe == 'USD' || valueToStore == 'EUR' || valueToStore == 'USD' ) {
-                localStorage.removeItem(valueToStore);
+                localStorage.setItem('222', valueToStore);
          }
         }
     });
