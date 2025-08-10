@@ -1,232 +1,462 @@
- // Переменная для отслеживания последнего активного поля
-        let lastActiveField = 'rub'; // по умолчанию рубли
+// Переменная для отслеживания последнего активного поля
+let lastActiveField = 'rub'; // по умолчанию рубли
+let isCalculatorMode = false; // Флаг режима калькулятора
 
-        // Service Worker registration for PWA
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(function(registration) {
-                console.log('ServiceWorker registered');
-            }).catch(function(err) {
-                console.log('ServiceWorker registration failed: ', err);
-            });
-        }
+// Service Worker registration for PWA
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(function(registration) {
+        console.log('ServiceWorker registered');
+    }).catch(function(err) {
+        console.log('ServiceWorker registration failed: ', err);
+    });
+}
 
-        // Установить последнее активное поле
-        function setLastActive(field) {
-            lastActiveField = field;
-        }
+// Установить последнее активное поле
+function setLastActive(field) {
+    lastActiveField = field;
+}
 
-        // Format number with thousands separator
-        function formatNumber(input) {
-            let value = input.value.replace(/\D/g, '');
-            if (value) {
-                input.value = parseInt(value).toLocaleString('ru-RU');
-            }
-        }
+// Format number with thousands separator
+function formatNumber(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value) {
+        input.value = parseInt(value).toLocaleString('ru-RU');
+    }
+}
 
-        function formatAndCalculate(input) {
-            formatNumber(input);
-            calculate();
-            updateConversion(); // Добавлено для обновления конвертации при изменении курсов
-        }
+function formatAndCalculate(input) {
+    formatNumber(input);
+    calculate();
+    updateConversion(); // Добавлено для обновления конвертации при изменении курсов
+}
 
-        // Get numeric value from formatted input
-        function getNumericValue(id) {
-            const value = document.getElementById(id).value.replace(/[^\d.,]/g, '').replace(',', '.');
-            return parseFloat(value) || 0;
-        }
+// Get numeric value from formatted input
+function getNumericValue(id) {
+    const value = document.getElementById(id).value.replace(/[^\d.,]/g, '').replace(',', '.');
+    return parseFloat(value) || 0;
+}
 
-        // Fetch exchange rates from API
-        async function fetchRates() {
-            try {
-                // Using exchangerate-api as it's free and doesn't require API key
-                const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
-                const data = await response.json();
-                
-                const usdToVnd = Math.ceil(data.rates.VND);
-                const eurToUsd = data.rates.EUR;
-                const eurToVnd = Math.round(usdToVnd / eurToUsd);
-                
-                document.getElementById('marketUsdVnd').value = usdToVnd.toLocaleString('ru-RU');
-                document.getElementById('marketEurVnd').value = eurToVnd.toLocaleString('ru-RU');
-                
-                calculate();
-                updateConversion(); // Обновить конвертацию после получения курсов
-            } catch (error) {
-                alert('Не удалось загрузить курсы валют. Проверьте интернет-соединение.');
-            }
-        }
+// Fetch exchange rates from API
+async function fetchRates() {
+    try {
+        // Using exchangerate-api as it's free and doesn't require API key
+        const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+        const data = await response.json();
+        const usdToVnd = Math.ceil(data.rates.VND);
+        const eurToUsd = data.rates.EUR;
+        const eurToVnd = Math.round(usdToVnd / eurToUsd);
+        document.getElementById('marketUsdVnd').value = usdToVnd.toLocaleString('ru-RU');
+        document.getElementById('marketEurVnd').value = eurToVnd.toLocaleString('ru-RU');
+        calculate();
+        updateConversion(); // Обновить конвертацию после получения курсов
+    } catch (error) {
+        alert('Не удалось загрузить курсы валют. Проверьте интернет-соединение.');
+    }
+}
 
-        // Clear market rates
-        function clearMarketRates() {
-            document.getElementById('marketUsdVnd').value = '';
-            document.getElementById('marketEurVnd').value = '';
-            calculate();
-            updateConversion(); // Обновить конвертацию после очистки
-        }
+// Clear market rates
+function clearMarketRates() {
+    document.getElementById('marketUsdVnd').value = '';
+    document.getElementById('marketEurVnd').value = '';
+    calculate();
+    updateConversion(); // Обновить конвертацию после очистки
+}
 
-        // Clear conversion fields
-        function clearConversion() {
-            document.getElementById('rubAmount').value = '';
+// Clear conversion fields
+function clearConversion() {
+    document.getElementById('rubAmount').value = '';
+    document.getElementById('vndAmount').value = '';
+    lastActiveField = 'rub'; // Сбросить к значению по умолчанию
+    calculateDifference(); // Пересчитать разницу
+    
+    // Если в калькуляторном режиме, обновить его
+    if (isCalculatorMode) {
+        initCalculatorMode();
+    }
+}
+
+// Clear all fields and cache
+function clearAll() {
+    // Очищаем все поля
+    document.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
+        input.value = '';
+        localStorage.removeItem(input.id);
+    });
+    
+    // Сбрасываем чекбоксы и радиокнопки
+    document.getElementById('newUsd').checked = false;
+    document.querySelector('input[name="currency"][value="USD"]').checked = true;
+    
+    // Пересчитываем
+    calculate();
+    calculateDifference();
+    
+    // Если в калькуляторном режиме, обновить его
+    if (isCalculatorMode) {
+        initCalculatorMode();
+    }
+}
+
+// Convert RUB to VND
+function convertRubToVnd() {
+    const rub = getNumericValue('rubAmount');
+    if (rub === 0) {
+        if (lastActiveField === 'rub') {
             document.getElementById('vndAmount').value = '';
-            lastActiveField = 'rub'; // Сбросить к значению по умолчанию
-            calculateDifference(); // Пересчитать разницу
         }
+        return;
+    }
+    const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
+    const isNewUsd = document.getElementById('newUsd').checked;
+    const usdPrice = getNumericValue('usdPrice');
+    const eurPrice = getNumericValue('eurPrice');
+    let exchangeRate;
+    if (isUsd) {
+        exchangeRate = isNewUsd ? getNumericValue('exchangeUsdVndNew') : getNumericValue('exchangeUsdVndOld');
+    } else {
+        exchangeRate = getNumericValue('exchangeEurVnd');
+    }
+    const price = isUsd ? usdPrice : eurPrice;
+    if (price && exchangeRate) {
+        const vnd = Math.round(rub / price * exchangeRate);
+        document.getElementById('vndAmount').value = vnd.toLocaleString('ru-RU');
+    }
+}
 
-        // Convert RUB to VND
-        function convertRubToVnd() {
-            const rub = getNumericValue('rubAmount');
-            if (rub === 0) {
-                if (lastActiveField === 'rub') {
-                    document.getElementById('vndAmount').value = '';
-                }
-                return;
-            }
-
-            const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
-            const isNewUsd = document.getElementById('newUsd').checked;
-            
-            const usdPrice = getNumericValue('usdPrice');
-            const eurPrice = getNumericValue('eurPrice');
-            
-            let exchangeRate;
-            if (isUsd) {
-                exchangeRate = isNewUsd ? getNumericValue('exchangeUsdVndNew') : getNumericValue('exchangeUsdVndOld');
-            } else {
-                exchangeRate = getNumericValue('exchangeEurVnd');
-            }
-            
-            const price = isUsd ? usdPrice : eurPrice;
-            
-            if (price && exchangeRate) {
-                const vnd = Math.round(rub / price * exchangeRate);
-                document.getElementById('vndAmount').value = vnd.toLocaleString('ru-RU');
-            }
+// Convert VND to RUB
+function convertVndToRub() {
+    const vnd = getNumericValue('vndAmount');
+    if (vnd === 0) {
+        if (lastActiveField === 'vnd') {
+            document.getElementById('rubAmount').value = '';
         }
+        return;
+    }
+    const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
+    const isNewUsd = document.getElementById('newUsd').checked;
+    const usdPrice = getNumericValue('usdPrice');
+    const eurPrice = getNumericValue('eurPrice');
+    let exchangeRate;
+    if (isUsd) {
+        exchangeRate = isNewUsd ? getNumericValue('exchangeUsdVndNew') : getNumericValue('exchangeUsdVndOld');
+    } else {
+        exchangeRate = getNumericValue('exchangeEurVnd');
+    }
+    const price = isUsd ? usdPrice : eurPrice;
+    if (price && exchangeRate) {
+        const rub = vnd / exchangeRate * price;
+        document.getElementById('rubAmount').value = rub.toLocaleString('ru-RU');
+    }
+}
 
-        // Convert VND to RUB
-        function convertVndToRub() {
-            const vnd = getNumericValue('vndAmount');
-            if (vnd === 0) {
-                if (lastActiveField === 'vnd') {
-                    document.getElementById('rubAmount').value = '';
-                }
-                return;
-            }
+function exchangeDiff(market, exchange, prise, element) {
+    if (market && exchange && prise) {
+        const diff = market - exchange;
+        const rubDiff = diff / (exchange / prise);
+        document.getElementById(element).style.display = 'block';
+        document.getElementById(element).innerHTML = 
+            `Разница c биржевым курсом: ${diff.toLocaleString('ru-RU')} ₫ ≈ ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
+    } else {
+        document.getElementById(element).style.display = 'none';
+    }          
+}
 
-            const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
-            const isNewUsd = document.getElementById('newUsd').checked;
-            
-            const usdPrice = getNumericValue('usdPrice');
-            const eurPrice = getNumericValue('eurPrice');
-            
-            let exchangeRate;
-            if (isUsd) {
-                exchangeRate = isNewUsd ? getNumericValue('exchangeUsdVndNew') : getNumericValue('exchangeUsdVndOld');
-            } else {
-                exchangeRate = getNumericValue('exchangeEurVnd');
-            }
-            
-            const price = isUsd ? usdPrice : eurPrice;
-            
-            if (price && exchangeRate) {
-                const rub = vnd / exchangeRate * price;
-                document.getElementById('rubAmount').value = rub.toLocaleString('ru-RU');
-            
-            }
-        }
+// Main calculation function
+function calculate() {
+    // Calculate differences for exchange rates
+    const marketUsd = getNumericValue('marketUsdVnd');
+    const marketEur = getNumericValue('marketEurVnd');
+    const usdPrice = getNumericValue('usdPrice');
+    const eurPrice = getNumericValue('eurPrice');
+    const exchangeUsdNew = getNumericValue('exchangeUsdVndNew');
+    const exchangeUsdOld = getNumericValue('exchangeUsdVndOld');
+    const exchangeEur = getNumericValue('exchangeEurVnd');
+    // USD New difference - corrected formula            
+    exchangeDiff(marketUsd,exchangeUsdNew,usdPrice,'diffUsdNew');    
+    // USD Old difference - corrected formula            
+    exchangeDiff(marketUsd,exchangeUsdOld,usdPrice, 'diffUsdOld');
+    // EUR difference - corrected formula     
+    exchangeDiff(marketEur,exchangeEur,eurPrice, 'diffEur');
+    // Calculate overall difference
+    calculateDifference();
+}
 
-       function exchangeDiff(market, exchange, prise, element) {
-             if (market && exchange && prise) {
-                const diff = market - exchange;
-                const rubDiff = diff / (exchange / prise);
-                document.getElementById(element).style.display = 'block';
-                document.getElementById(element).innerHTML = 
-                    `Разница c биржевым курсом: ${diff.toLocaleString('ru-RU')} ₫ ≈ ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
-            } else {
-                document.getElementById(element).style.display = 'none';
-            }          
-        }
+// Update conversion when currency or new USD checkbox changes
+function updateConversion() {
+    // Пересчитываем значения в зависимости от последнего активного поля
+    if (lastActiveField === 'rub' && document.getElementById('rubAmount').value) {
+        convertRubToVnd();
+    } else if (lastActiveField === 'vnd' && document.getElementById('vndAmount').value) {
+        convertVndToRub();
+    }
+    calculateDifference(); // Обязательно пересчитываем разницу
+}
 
-        // Main calculation function
-        function calculate() {
-            // Calculate differences for exchange rates
-            const marketUsd = getNumericValue('marketUsdVnd');
-            const marketEur = getNumericValue('marketEurVnd');
-            const usdPrice = getNumericValue('usdPrice');
-            const eurPrice = getNumericValue('eurPrice');
-            const exchangeUsdNew = getNumericValue('exchangeUsdVndNew');
-            const exchangeUsdOld = getNumericValue('exchangeUsdVndOld');
-            const exchangeEur = getNumericValue('exchangeEurVnd');
-            
-            // USD New difference - corrected formula            
-            exchangeDiff(marketUsd,exchangeUsdNew,usdPrice,'diffUsdNew');    
-            
-            // USD Old difference - corrected formula            
-            exchangeDiff(marketUsd,exchangeUsdOld,usdPrice, 'diffUsdOld');
-            
-            // EUR difference - corrected formula     
-            exchangeDiff(marketEur,exchangeEur,eurPrice, 'diffEur');
-            
-            // Calculate overall difference
-            calculateDifference();
-        }
+// Calculate difference between USD and EUR
+function calculateDifference() {
+    const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
+    const isNewUsd = document.getElementById('newUsd').checked;
+    const usdPrice = getNumericValue('usdPrice');
+    const eurPrice = getNumericValue('eurPrice');
+    const rubAmount = getNumericValue('rubAmount');
+    const vndAmount = getNumericValue('vndAmount');
+    let usdExchange = isNewUsd ? getNumericValue('exchangeUsdVndNew') : getNumericValue('exchangeUsdVndOld');
+    const eurExchange = getNumericValue('exchangeEurVnd');
+    // Используем любое из заполненных значений для расчета
+    const hasRubOrVnd = rubAmount > 0 || vndAmount > 0;
+    if (usdPrice && eurPrice && usdExchange && eurExchange && hasRubOrVnd) {
+        // Определяем базовую сумму в рублях
+        const baseAmount = rubAmount > 0 ? rubAmount : 
+            (vndAmount / (isUsd ? usdExchange : eurExchange) * (isUsd ? usdPrice : eurPrice));
+        const vndViaUsd = baseAmount / usdPrice * usdExchange;
+        const vndViaEur = baseAmount / eurPrice * eurExchange;
+        const difference = isUsd ? (vndViaUsd - vndViaEur) : (vndViaEur - vndViaUsd);
+        const rubDifference = Math.abs(difference / (isUsd ? vndViaUsd : vndViaEur) * baseAmount);
+        const savingsOrLosses = difference < 0 ? 'Экономия' : 'Потери';
+        const altCurrency = isUsd ? 'EUR' : 'USD';
+        document.getElementById('differenceResult').innerHTML = 
+            `<span class="${difference < 0 ? 'savings' : 'losses'}">${savingsOrLosses}</span> 
+            ${Math.abs(Math.round(difference)).toLocaleString('ru-RU')} ₫ ⟹ 
+            ${rubDifference.toFixed(2).replace('.', ',')} ₽, 
+            если бы обмен был ${altCurrency}`;
+    } else {
+        document.getElementById('differenceResult').innerHTML = 'Введите данные для расчета';
+    }
+}
 
-        // Update conversion when currency or new USD checkbox changes
-        function updateConversion() {
-            // Пересчитываем значения в зависимости от последнего активного поля
-            if (lastActiveField === 'rub' && document.getElementById('rubAmount').value) {
-                convertRubToVnd();
-            } else if (lastActiveField === 'vnd' && document.getElementById('vndAmount').value) {
-                convertVndToRub();
-            }
-            calculateDifference(); // Обязательно пересчитываем разницу
-        }
+// Переключение режима калькулятора
+function toggleCalculatorMode() {
+    const calculatorMode = document.getElementById('calculatorMode');
+    const conversionBlock = document.getElementById('conversionBlock');
+    const differenceBlock = document.getElementById('differenceBlock');
+    const toggleButton = document.getElementById('toggleModeButton');
+    
+    isCalculatorMode = !isCalculatorMode;
+    
+    if (isCalculatorMode) {
+        // Переключаемся в режим калькулятора
+        calculatorMode.style.display = 'flex';
+        conversionBlock.style.display = 'none';
+        differenceBlock.style.display = 'none';
+        toggleButton.textContent = 'Показать всё';
+        
+        // Инициализируем калькулятор
+        initCalculatorMode();
+    } else {
+        // Возвращаемся к обычному режиму
+        calculatorMode.style.display = 'none';
+        conversionBlock.style.display = 'block';
+        differenceBlock.style.display = 'block';
+        toggleButton.textContent = 'Оставить только конвертор';
+    }
+}
 
-        // Calculate difference between USD and EUR
-        function calculateDifference() {
-            const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
-            const isNewUsd = document.getElementById('newUsd').checked;
-            
-            const usdPrice = getNumericValue('usdPrice');
-            const eurPrice = getNumericValue('eurPrice');
-            const rubAmount = getNumericValue('rubAmount');
-            const vndAmount = getNumericValue('vndAmount');
-            
-            let usdExchange = isNewUsd ? getNumericValue('exchangeUsdVndNew') : getNumericValue('exchangeUsdVndOld');
-            const eurExchange = getNumericValue('exchangeEurVnd');
-            
-            // Используем любое из заполненных значений для расчета
-            const hasRubOrVnd = rubAmount > 0 || vndAmount > 0;
-            
-            if (usdPrice && eurPrice && usdExchange && eurExchange && hasRubOrVnd) {
-                // Определяем базовую сумму в рублях
-                const baseAmount = rubAmount > 0 ? rubAmount : 
-                    (vndAmount / (isUsd ? usdExchange : eurExchange) * (isUsd ? usdPrice : eurPrice));
-                
-                const vndViaUsd = baseAmount / usdPrice * usdExchange;
-                const vndViaEur = baseAmount / eurPrice * eurExchange;
-                
-                const difference = isUsd ? (vndViaUsd - vndViaEur) : (vndViaEur - vndViaUsd);
-                const rubDifference = Math.abs(difference / (isUsd ? vndViaUsd : vndViaEur) * baseAmount);
-                
-                const savingsOrLosses = difference < 0 ? 'Экономия' : 'Потери';
-                const altCurrency = isUsd ? 'EUR' : 'USD';
-                
-                document.getElementById('differenceResult').innerHTML = 
-                    `<span class="${difference < 0 ? 'savings' : 'losses'}">${savingsOrLosses}</span> 
-                    ${Math.abs(Math.round(difference)).toLocaleString('ru-RU')} ₫ ⟹ 
-                    ${rubDifference.toFixed(2).replace('.', ',')} ₽, 
-                    если бы обмен был ${altCurrency}`;
-            } else {
-                document.getElementById('differenceResult').innerHTML = 'Введите данные для расчета';
-            }
-        }
+// Инициализация калькуляторного режима
+function initCalculatorMode() {
+    // Копируем значения из обычных полей
+    const vndValue = document.getElementById('vndAmount').value.replace(/\s/g, '');
+    const rubValue = document.getElementById('rubAmount').value.replace(/\s/g, '');
+    
+    document.getElementById('vndCalculatorValue').textContent = vndValue || '0';
+    document.getElementById('rubCalculatorValue').textContent = rubValue || '0';
+    
+    // Устанавливаем активное поле
+    const activeField = lastActiveField === 'vnd' ? 'vnd' : 'rub';
+    setActiveCalculatorField(activeField);
+    
+    // Устанавливаем текущую валюту
+    const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
+    document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
+    updateCurrencyExchangeButton();
+}
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Set default values for testing
-            // Remove these lines in production
-        });
+// Установка активного поля в калькуляторе
+function setActiveCalculatorField(field) {
+    document.getElementById('activeCalculatorField').value = field;
+    
+    // Обновляем визуальное отображение
+    document.getElementById('vndCalculatorField').classList.toggle('active', field === 'vnd');
+    document.getElementById('rubCalculatorField').classList.toggle('active', field === 'rub');
+}
+
+// Добавление цифры
+function addDigit(digit) {
+    const field = document.getElementById('activeCalculatorField').value;
+    const display = document.getElementById(`${field}CalculatorValue`);
+    let value = display.textContent;
+    
+    // Удаляем "0" если это первая цифра
+    if (value === '0' && digit !== '.') {
+        value = '';
+    }
+    
+    // Добавляем цифру
+    if (digit === '.' && value.includes('.')) return; // Не добавляем вторую точку
+    display.textContent = value + digit;
+    
+    // Обновляем основные поля
+    updateMainFields();
+}
+
+// Добавление оператора
+function addOperator(operator) {
+    const field = document.getElementById('activeCalculatorField').value;
+    const display = document.getElementById(`${field}CalculatorValue`);
+    const currentExpression = document.getElementById('currentExpression').value;
+    let value = display.textContent;
+    
+    // Формируем выражение
+    let expression = currentExpression;
+    if (expression === '' || expression.endsWith(' ')) {
+        expression = value + ' ' + operator + ' ';
+    } else {
+        expression += value + ' ' + operator + ' ';
+    }
+    
+    document.getElementById('currentExpression').value = expression;
+    display.textContent = '0';
+}
+
+// Вычисление выражения
+function calculateExpression() {
+    const field = document.getElementById('activeCalculatorField').value;
+    const display = document.getElementById(`${field}CalculatorValue`);
+    const expression = document.getElementById('currentExpression').value + display.textContent;
+    
+    try {
+        // Заменяем операторы для вычисления
+        const calcExpression = expression
+            .replace(/÷/g, '/')
+            .replace(/×/g, '*')
+            .replace(/−/g, '-')
+            .replace(/,/g, '.');
+        
+        // Вычисляем
+        const result = eval(calcExpression);
+        
+        // Отображаем результат
+        display.textContent = formatCalculatorResult(result);
+        document.getElementById('currentExpression').value = '';
+        
+        // Обновляем основные поля
+        updateMainFields();
+    } catch (e) {
+        display.textContent = 'Ошибка';
+        setTimeout(() => {
+            display.textContent = '0';
+        }, 1500);
+    }
+}
+
+// Форматирование результата для отображения
+function formatCalculatorResult(value) {
+    if (isNaN(value)) return '0';
+    
+    // Округляем до 2 знаков после запятой для денежных значений
+    return value.toLocaleString('ru-RU', {
+        maximumFractionDigits: 2,
+        useGrouping: true
+    });
+}
+
+// Обмен значениями между полями
+function swapValues() {
+    const vndValue = document.getElementById('vndCalculatorValue').textContent;
+    const rubValue = document.getElementById('rubCalculatorValue').textContent;
+    
+    document.getElementById('vndCalculatorValue').textContent = rubValue;
+    document.getElementById('rubCalculatorValue').textContent = vndValue;
+    
+    // Меняем активное поле
+    const activeField = document.getElementById('activeCalculatorField').value;
+    setActiveCalculatorField(activeField === 'vnd' ? 'rub' : 'vnd');
+    
+    // Обновляем основные поля
+    updateMainFields();
+}
+
+// Удаление последнего символа
+function backspace() {
+    const field = document.getElementById('activeCalculatorField').value;
+    const display = document.getElementById(`${field}CalculatorValue`);
+    let value = display.textContent;
+    
+    if (value.length > 1) {
+        display.textContent = value.slice(0, -1);
+    } else {
+        display.textContent = '0';
+    }
+    
+    // Обновляем основные поля
+    updateMainFields();
+}
+
+// Очистка активного поля
+function clearActiveField() {
+    const field = document.getElementById('activeCalculatorField').value;
+    document.getElementById(`${field}CalculatorValue`).textContent = '0';
+    
+    // Обновляем основные поля
+    updateMainFields();
+}
+
+// Очистка всех полей
+function clearAllFields() {
+    document.getElementById('vndCalculatorValue').textContent = '0';
+    document.getElementById('rubCalculatorValue').textContent = '0';
+    document.getElementById('currentExpression').value = '';
+    
+    // Обновляем основные поля
+    updateMainFields();
+}
+
+// Переключение валюты (USD/EUR)
+function toggleCurrency() {
+    const currencyBtn = document.querySelector('.currency-exchange');
+    const currentCurrency = document.getElementById('currentCurrency').value;
+    
+    // Переключаем класс для анимации
+    currencyBtn.classList.toggle('flipped');
+    
+    // Меняем значение
+    const newCurrency = currentCurrency === 'USD' ? 'EUR' : 'USD';
+    document.getElementById('currentCurrency').value = newCurrency;
+    
+    // Обновляем радиокнопки в основном режиме
+    if (document.querySelector(`input[name="currency"][value="${newCurrency}"]`)) {
+        document.querySelector(`input[name="currency"][value="${newCurrency}"]`).checked = true;
+    }
+    
+    updateCurrencyExchangeButton();
+    
+    // Пересчитываем значения
+    calculate();
+    updateConversion();
+}
+
+// Обновление текста кнопки валют
+function updateCurrencyExchangeButton() {
+    const currentCurrency = document.getElementById('currentCurrency').value;
+    const currencyBtn = document.querySelector('.currency-exchange');
+    
+    // Удаляем классы перед добавлением новых
+    currencyBtn.classList.remove('usd', 'eur');
+    currencyBtn.classList.add(currentCurrency.toLowerCase());
+}
+
+// Обновление основных полей из калькулятора
+function updateMainFields() {
+    const vndValue = document.getElementById('vndCalculatorValue').textContent.replace(/\s/g, '');
+    const rubValue = document.getElementById('rubCalculatorValue').textContent.replace(/\s/g, '');
+    
+    // Обновляем основные поля
+    document.getElementById('vndAmount').value = vndValue === '0' ? '' : parseInt(vndValue).toLocaleString('ru-RU');
+    document.getElementById('rubAmount').value = rubValue === '0' ? '' : parseFloat(rubValue).toLocaleString('ru-RU');
+    
+    // Пересчитываем
+    calculate();
+    calculateDifference();
+}
 
 // При вводе сохраняем значение поля
 document.querySelectorAll('input').forEach(input => {
@@ -242,5 +472,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (savedValue !== null) {
       input.value = savedValue;
     }
+  });
+  
+  // Добавляем обработчик для фокуса на полях калькулятора
+  document.getElementById('vndCalculatorField').addEventListener('click', () => {
+    setActiveCalculatorField('vnd');
+  });
+  
+  document.getElementById('rubCalculatorField').addEventListener('click', () => {
+    setActiveCalculatorField('rub');
   });
 });
