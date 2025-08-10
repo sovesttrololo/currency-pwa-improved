@@ -234,206 +234,11 @@
             input {
                 font-size: 16px !important;
             }
-			/* Калькуляторный режим */
-.calculator-mode {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: white;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    box-sizing: border-box;
-    overflow: hidden;
-}
-
-.calculator-header {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.input-field {
-    width: 100%;
-    padding: 15px;
-    text-align: right;
-    font-size: 36px;
-    margin: 10px 0;
-    position: relative;
-    overflow: hidden;
-    border-radius: 12px;
-    transition: all 0.3s;
-}
-
-.input-field.active {
-    background-color: #f0f9ff;
-}
-
-.currency-icon {
-    position: absolute;
-    left: 15px;
-    font-size: 24px;
-    color: #666;
-    transition: color 0.3s;
-}
-
-.input-field.active .currency-icon {
-    color: #667eea;
-}
-
-.input-value {
-    width: calc(100% - 50px);
-    margin-left: 40px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.exchange-icon {
-    font-size: 24px;
-    margin: 10px 0;
-    cursor: pointer;
-    color: #666;
-}
-
-.calculator-keypad {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-.keypad-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.key {
-    flex: 1;
-    aspect-ratio: 1/1;
-    border-radius: 50%;
-    border: none;
-    font-size: 20px;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.key:active {
-    transform: scale(0.95);
-    opacity: 0.8;
-}
-
-.digit-key {
-    background-color: #f0f0f0;
-    color: #333;
-}
-
-.math-key {
-    background-color: #ff9500;
-    color: white;
-}
-
-.action-key {
-    background-color: #e0e0e0;
-    color: #333;
-}
-
-.exchange-currency {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    position: relative;
-    overflow: hidden;
-}
-
-.currency-exchange {
-    width: 100%;
-    height: 100%;
-    perspective: 1000px;
-}
-
-.currency-exchange .front,
-.currency-exchange .back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.6s;
-    font-weight: bold;
-}
-
-.currency-exchange .back {
-    transform: rotateY(180deg);
-}
-
-.currency-exchange.flipped .front {
-    transform: rotateY(180deg);
-}
-
-.currency-exchange.flipped .back {
-    transform: rotateY(0deg);
-}
-
-.calculator-footer {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.button-row {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-    flex-wrap: wrap;
-}
-
-.conversion-button {
-    flex: 1;
-    min-width: 100px;
-    padding: 8px;
-    font-size: 14px;
-}
-
-/* Стили для мобильных устройств */
-@media (max-width: 480px) {
-    .input-field {
-        font-size: 32px;
-    }
-    
-    .key {
-        font-size: 18px;
-    }
-    
-    .button-row {
-        flex-direction: column;
-    }
-    
-    .button-row .conversion-button {
-        width: 100%;
-    }
-}
-/* Исправления для калькуляторного режима */
+			/* Исправления для калькуляторного режима */
 .calculator-mode {
     touch-action: manipulation; /* Предотвращает двойной тап для увеличения */
     -webkit-tap-highlight-color: transparent;
+    padding-top: 20px;
 }
 
 .input-field-container {
@@ -441,6 +246,7 @@
     flex-direction: column;
     width: 100%;
     position: relative;
+    margin-bottom: 20px;
 }
 
 .exchange-icon-container {
@@ -463,23 +269,43 @@
     min-height: 40px !important;
     padding: 8px 15px !important;
     font-size: 28px !important;
+    border-radius: 12px;
+    background: #f8f9fa;
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+.input-field.active {
+    background: white;
+    box-shadow: 0 0 0 2px #667eea;
 }
 
 .input-value {
     min-height: auto !important;
     font-size: 28px !important;
     line-height: 1.2 !important;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .key {
-    border-radius: 12px !important;
+    border-radius: 50% !important;
     aspect-ratio: auto !important;
-    height: 50px !important;
+    width: 50px;
+    height: 50px;
     margin: 0 4px 8px !important;
+    font-size: 18px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .keypad-row {
     gap: 8px !important;
+    justify-content: center;
 }
 
 /* Скрытие стандартной клавиатуры */
@@ -505,7 +331,9 @@ input[type=number] {
     }
     
     .key {
-        height: 45px !important;
+        width: 45px;
+        height: 45px;
+        font-size: 16px !important;
     }
     
     .exchange-icon-container {
@@ -513,5 +341,4 @@ input[type=number] {
         height: 36px;
     }
 }
-
         }

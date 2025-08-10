@@ -148,6 +148,9 @@
 <!-- Калькуляторный режим (скрыт по умолчанию) -->
 <div class="calculator-mode" id="calculatorMode" style="display: none;">
     <div class="calculator-header">
+        <div id="calculatorDifferenceResult" class="result-block" style="margin-bottom: 15px; display: none;">
+            Введите данные для расчета
+        </div>
         <div class="input-field-container">
             <div class="input-field" id="vndCalculatorField">
                 <span class="currency-icon">₫</span>
@@ -160,9 +163,6 @@
                 <span class="currency-icon">₽</span>
                 <div class="input-value" id="rubCalculatorValue">0</div>
             </div>
-        </div>
-        <div id="calculatorDifferenceResult" class="result-block" style="margin-top: 10px; display: none;">
-            Введите данные для расчета
         </div>
     </div>
     
@@ -218,6 +218,7 @@
     <input type="hidden" id="activeCalculatorField" value="vnd">
     <input type="hidden" id="currentExpression" value="">
     <input type="hidden" id="currentCurrency" value="USD">
+    <input type="hidden" id="calculatorLastActive" value="vnd">
 </div>
     </div>
 

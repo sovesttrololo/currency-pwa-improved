@@ -2,6 +2,14 @@
 let lastActiveField = 'rub'; // по умолчанию рубли
 let isCalculatorMode = false; // Флаг режима калькулятора
 let calculatorInitialized = false; // Флаг инициализации калькулятора
+let calculatorState = {
+    currentInput: '0',
+    operator: null,
+    firstValue: null,
+    waitingForSecondValue: false,
+    expression: '',
+    lastOperation: null
+};
 
 // Service Worker registration for PWA
 if ('serviceWorker' in navigator) {
@@ -35,6 +43,29 @@ function formatAndCalculate(input) {
 function getNumericValue(id) {
     const value = document.getElementById(id).value.replace(/[^\d.,]/g, '').replace(',', '.');
     return parseFloat(value) || 0;
+}
+
+// Format value for display with thousands separator
+function formatDisplayValue(value) {
+    if (value === '' || value === '0') return '0';
+    
+    const num = parseFloat(value);
+    if (isNaN(num)) return '0';
+    
+    // Для целых чисел
+    if (Number.isInteger(num)) {
+        return num.toLocaleString('ru-RU');
+    }
+    
+    // Для дробных чисел
+    return num.toLocaleString('ru-RU', {
+        maximumFractionDigits: 10
+    });
+}
+
+// Format value for calculation (without separators)
+function formatCalcValue(value) {
+    return value.replace(/\s/g, '').replace(',', '.');
 }
 
 // Fetch exchange rates from API
@@ -270,8 +301,8 @@ function initCalculatorMode() {
     const vndValue = document.getElementById('vndAmount').value.replace(/\s/g, '') || '0';
     const rubValue = document.getElementById('rubAmount').value.replace(/\s/g, '') || '0';
     
-    document.getElementById('vndCalculatorValue').textContent = vndValue === '' ? '0' : vndValue;
-    document.getElementById('rubCalculatorValue').textContent = rubValue === '' ? '0' : rubValue;
+    document.getElementById('vndCalculatorValue').textContent = vndValue === '' ? '0' : formatDisplayValue(vndValue);
+    document.getElementById('rubCalculatorValue').textContent = rubValue === '' ? '0' : formatDisplayValue(rubValue);
     
     // Устанавливаем активное поле
     const activeField = lastActiveField === 'vnd' ? 'vnd' : 'rub';
@@ -282,6 +313,9 @@ function initCalculatorMode() {
     document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
     updateCurrencyExchangeButton();
     
+    // Инициализируем состояние калькулятора
+    resetCalculatorState();
+    
     // Обновляем блок разницы
     calculateDifference();
 }
@@ -289,24 +323,38 @@ function initCalculatorMode() {
 // Установка активного поля в калькуляторе
 function setActiveCalculatorField(field) {
     document.getElementById('activeCalculatorField').value = field;
+    document.getElementById('calculatorLastActive').value = field;
     
     // Обновляем визуальное отображение
     document.getElementById('vndCalculatorField').classList.toggle('active', field === 'vnd');
     document.getElementById('rubCalculatorField').classList.toggle('active', field === 'rub');
 }
 
-// Добавление цифры или оператора
+// Сброс состояния калькулятора
+function resetCalculatorState() {
+    calculatorState = {
+        currentInput: '0',
+        operator: null,
+        firstValue: null,
+        waitingForSecondValue: false,
+        expression: '',
+        lastOperation: null
+    };
+}
+
+// Добавление цифры
 function addDigit(digit) {
     const field = document.getElementById('activeCalculatorField').value;
     const display = document.getElementById(`${field}CalculatorValue`);
-    let value = display.textContent;
+    let value = display.textContent.replace(/\s/g, '');
     
     // Если текущее значение - результат, сбрасываем его
-    if (value.startsWith('=')) {
+    if (calculatorState.waitingForSecondValue) {
         value = '0';
+        calculatorState.waitingForSecondValue = false;
     }
     
-    // Удаляем "0" если это первая цифра и не точка
+    // Если текущее значение 0, заменяем его
     if (value === '0' && digit !== '.') {
         value = '';
     }
@@ -314,15 +362,13 @@ function addDigit(digit) {
     // Добавляем цифру
     if (digit === '.' && value.includes('.')) return; // Не добавляем вторую точку
     
-    // Если текущее выражение не пустое, добавляем в выражение
-    const currentExpression = document.getElementById('currentExpression').value;
-    if (currentExpression !== '') {
-        document.getElementById('currentExpression').value = '';
-        display.textContent = '0';
-        value = '0';
-    }
+    value += digit;
     
-    display.textContent = value + digit;
+    // Обновляем отображение
+    display.textContent = formatDisplayValue(value);
+    
+    // Обновляем состояние
+    calculatorState.currentInput = value;
     
     // Обновляем основные поля
     updateMainFields();
@@ -332,73 +378,81 @@ function addDigit(digit) {
 function addOperator(operator) {
     const field = document.getElementById('activeCalculatorField').value;
     const display = document.getElementById(`${field}CalculatorValue`);
-    const currentExpression = document.getElementById('currentExpression').value;
-    let value = display.textContent;
+    const value = formatCalcValue(display.textContent);
     
-    // Если текущее значение - результат, используем его как начальное значение
-    if (value.startsWith('=')) {
-        value = value.substring(1);
+    // Если это первый оператор
+    if (!calculatorState.operator) {
+        calculatorState.firstValue = parseFloat(value);
+        calculatorState.operator = operator;
+        calculatorState.waitingForSecondValue = true;
+        return;
     }
     
-    // Формируем выражение
-    let expression = currentExpression;
-    if (expression === '' || expression.endsWith(' ')) {
-        expression = value + ' ' + operator + ' ';
-    } else {
-        expression += value + ' ' + operator + ' ';
+    // Если уже есть оператор, вычисляем промежуточный результат
+    if (calculatorState.waitingForSecondValue) {
+        calculatorState.operator = operator;
+        return;
     }
     
-    document.getElementById('currentExpression').value = expression;
+    // Вычисляем промежуточный результат
+    const secondValue = parseFloat(value);
+    const result = performCalculation(calculatorState.firstValue, secondValue, calculatorState.operator);
     
-    // Отображаем выражение в поле
-    display.textContent = expression;
+    // Обновляем отображение
+    display.textContent = formatDisplayValue(result.toString());
+    
+    // Обновляем состояние
+    calculatorState.firstValue = result;
+    calculatorState.currentInput = result.toString();
+    calculatorState.operator = operator;
+    calculatorState.waitingForSecondValue = true;
 }
 
 // Вычисление выражения
 function calculateExpression() {
     const field = document.getElementById('activeCalculatorField').value;
     const display = document.getElementById(`${field}CalculatorValue`);
-    const expression = document.getElementById('currentExpression').value + display.textContent;
+    const value = formatCalcValue(display.textContent);
     
-    try {
-        // Заменяем операторы для вычисления
-        const calcExpression = expression
-            .replace(/÷/g, '/')
-            .replace(/×/g, '*')
-            .replace(/−/g, '-')
-            .replace(/,/g, '.');
-        
-        // Вычисляем
-        const result = eval(calcExpression);
-        
-        // Отображаем результат
-        const formattedResult = formatCalculatorResult(result);
-        display.textContent = '=' + formattedResult;
-        document.getElementById('currentExpression').value = '';
-        
-        // Обновляем основные поля
-        updateMainFields();
-        
-        // Пересчитываем разницу
-        calculateDifference();
-    } catch (e) {
-        display.textContent = 'Ошибка';
-        setTimeout(() => {
-            display.textContent = '0';
-            document.getElementById('currentExpression').value = '';
-        }, 1500);
+    if (!calculatorState.operator || !calculatorState.firstValue) {
+        return;
     }
+    
+    const secondValue = parseFloat(value);
+    const result = performCalculation(calculatorState.firstValue, secondValue, calculatorState.operator);
+    
+    // Обновляем отображение
+    display.textContent = formatDisplayValue(result.toString());
+    
+    // Обновляем состояние
+    calculatorState.currentInput = result.toString();
+    calculatorState.firstValue = result;
+    calculatorState.operator = null;
+    calculatorState.waitingForSecondValue = false;
+    
+    // Обновляем основные поля
+    updateMainFields();
+    
+    // Пересчитываем разницу
+    calculateDifference();
 }
 
-// Форматирование результата для отображения
-function formatCalculatorResult(value) {
-    if (isNaN(value)) return '0';
-    
-    // Округляем до 2 знаков после запятой для денежных значений
-    return value.toLocaleString('ru-RU', {
-        maximumFractionDigits: 2,
-        useGrouping: true
-    });
+// Выполнение вычисления
+function performCalculation(firstValue, secondValue, operator) {
+    switch (operator) {
+        case '+':
+            return firstValue + secondValue;
+        case '-':
+            return firstValue - secondValue;
+        case '×':
+        case '*':
+            return firstValue * secondValue;
+        case '÷':
+        case '/':
+            return firstValue / secondValue;
+        default:
+            return secondValue;
+    }
 }
 
 // Обмен значениями между полями
@@ -424,19 +478,19 @@ function swapValues() {
 function backspace() {
     const field = document.getElementById('activeCalculatorField').value;
     const display = document.getElementById(`${field}CalculatorValue`);
-    let value = display.textContent;
-    
-    // Если текущее значение - результат, сбрасываем его
-    if (value.startsWith('=')) {
-        value = value.substring(1);
-        display.textContent = value;
-    }
+    let value = formatCalcValue(display.textContent);
     
     if (value.length > 1) {
-        display.textContent = value.slice(0, -1);
+        value = value.slice(0, -1);
     } else {
-        display.textContent = '0';
+        value = '0';
     }
+    
+    // Обновляем отображение
+    display.textContent = formatDisplayValue(value);
+    
+    // Обновляем состояние
+    calculatorState.currentInput = value;
     
     // Обновляем основные поля
     updateMainFields();
@@ -447,6 +501,9 @@ function clearActiveField() {
     const field = document.getElementById('activeCalculatorField').value;
     document.getElementById(`${field}CalculatorValue`).textContent = '0';
     
+    // Сброс состояния калькулятора
+    resetCalculatorState();
+    
     // Обновляем основные поля
     updateMainFields();
 }
@@ -455,7 +512,9 @@ function clearActiveField() {
 function clearAllFields() {
     document.getElementById('vndCalculatorValue').textContent = '0';
     document.getElementById('rubCalculatorValue').textContent = '0';
-    document.getElementById('currentExpression').value = '';
+    
+    // Сброс состояния калькулятора
+    resetCalculatorState();
     
     // Обновляем основные поля
     updateMainFields();
@@ -479,14 +538,12 @@ function toggleCurrency() {
     // Обновляем радиокнопки в основном режиме
     if (document.querySelector(`input[name="currency"][value="${newCurrency}"]`)) {
         document.querySelector(`input[name="currency"][value="${newCurrency}"]`).checked = true;
+        calculate();
+        updateConversion();
+        calculateDifference();
     }
     
     updateCurrencyExchangeButton();
-    
-    // Пересчитываем значения
-    calculate();
-    updateConversion();
-    calculateDifference();
 }
 
 // Обновление текста кнопки валют
@@ -501,15 +558,20 @@ function updateCurrencyExchangeButton() {
 
 // Обновление основных полей из калькулятора
 function updateMainFields() {
-    const vndValue = document.getElementById('vndCalculatorValue').textContent.replace(/\s/g, '').replace('=', '');
-    const rubValue = document.getElementById('rubCalculatorValue').textContent.replace(/\s/g, '').replace('=', '');
+    const vndValue = formatCalcValue(document.getElementById('vndCalculatorValue').textContent);
+    const rubValue = formatCalcValue(document.getElementById('rubCalculatorValue').textContent);
     
     // Обновляем основные поля
-    document.getElementById('vndAmount').value = vndValue === '0' ? '' : parseInt(vndValue.replace(/[^0-9]/g, '')).toLocaleString('ru-RU');
-    document.getElementById('rubAmount').value = rubValue === '0' ? '' : parseFloat(rubValue).toLocaleString('ru-RU');
+    document.getElementById('vndAmount').value = vndValue === '0' ? '' : formatDisplayValue(vndValue);
+    document.getElementById('rubAmount').value = rubValue === '0' ? '' : formatDisplayValue(rubValue);
+    
+    // Обновляем последнее активное поле
+    const lastActive = document.getElementById('calculatorLastActive').value;
+    lastActiveField = lastActive;
     
     // Пересчитываем
     calculate();
+    updateConversion();
     calculateDifference();
 }
 
@@ -542,4 +604,27 @@ document.addEventListener('DOMContentLoaded', () => {
   calculate();
   updateConversion();
   calculateDifference();
+  
+  // Добавляем обработчики для радиокнопок
+  document.querySelectorAll('input[name="currency"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      calculate();
+      updateConversion();
+      calculateDifference();
+      
+      // Если в калькуляторном режиме, обновить валюту
+      if (isCalculatorMode && calculatorInitialized) {
+        const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
+        document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
+        updateCurrencyExchangeButton();
+      }
+    });
+  });
+  
+  // Добавляем обработчик для чекбокса новых долларов
+  document.getElementById('newUsd').addEventListener('change', () => {
+    calculate();
+    updateConversion();
+    calculateDifference();
+  });
 });
