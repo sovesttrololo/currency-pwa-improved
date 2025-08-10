@@ -541,7 +541,7 @@ function clearAllFields() {
 
 // Переключение валюты (USD/EUR)
 function toggleCurrency() {
-    const currencyBtn = document.querySelector('.currency-exchange');
+    const currencyBtn = document.querySelector('.exchange-currency');
     const currentCurrency = document.getElementById('currentCurrency').value;
     
     // Переключаем класс для анимации
@@ -557,7 +557,18 @@ function toggleCurrency() {
         handleCurrencyChange();
     }
     
-    updateCurrencyExchangeButton();
+    // Обновляем отображение
+    updateCurrencyDisplay();
+}
+
+// Обновление отображения валюты
+function updateCurrencyDisplay() {
+    const currentCurrency = document.getElementById('currentCurrency').value;
+    const currencyBtn = document.querySelector('.exchange-currency');
+    
+    // Удаляем классы перед добавлением новых
+    currencyBtn.classList.remove('usd', 'eur');
+    currencyBtn.classList.add(currentCurrency.toLowerCase());
 }
 
 // Обновление текста кнопки валют
