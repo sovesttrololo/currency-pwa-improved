@@ -822,14 +822,25 @@ function updateMainFields() {
 }
 
   
-// При вводе сохраняем значение поля, кроме полей биржевого курса
+// При вводе сохраняем значение поля
 document.querySelectorAll('input').forEach(input => {
-  // Поля биржевого курса (marketUsdVnd, marketEurVnd) не сохраняем в localStorage
-  if (input.id !== 'marketUsdVnd' && input.id !== 'marketEurVnd') {
+  if (input.id !== 'rubAmount' && input.id !== 'vndAmount') {
     input.addEventListener('input', () => {
       localStorage.setItem(input.id, input.value);
     });
   }
+});
+
+// При загрузке страницы восстанавливаем значения
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('input').forEach(input => {
+    if (input.id !== 'rubAmount' && input.id !== 'vndAmount') {
+      const savedValue = localStorage.getItem(input.id);
+      if (savedValue !== null) {
+        input.value = savedValue;
+      }
+    }
+  });
 });
   // Инициализация при загрузке
   handleCurrencyChange();
