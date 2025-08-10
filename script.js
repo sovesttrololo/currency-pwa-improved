@@ -838,7 +838,12 @@ function restoreSelectedCurrency() {
 // При вводе сохраняем значение поля
 document.querySelectorAll('input').forEach(input => {
     input.addEventListener('input', () => {
-      localStorage.setItem(input.id, input.value);
+        const valueToStore = input.key;
+         if (valueToStore !== null && valueToStore !== undefined && valueToStore.trim() !== '') {
+             localStorage.setItem(input.id, input.value);
+         } else {
+        localStorage.removeItem(input.id);
+      }
     });
 });
 
