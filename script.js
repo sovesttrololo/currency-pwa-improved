@@ -844,11 +844,9 @@ document.querySelectorAll('input').forEach(input => {
       } else {
         const valueToStore = input.value;
         const keyToStoe = input.key;
-         if (valueToStore && keyToStoe !== null && keyToStoe !== undefined && keyToStoe.trim() !== '') {
+         if (keyToStoe !== null && keyToStoe !== undefined && keyToStoe.trim() !== '') {
              localStorage.setItem(input.id, valueToStore);
-         } else {
-        localStorage.removeItem(input.id);
-      }
+         }
         }
     });
 });
