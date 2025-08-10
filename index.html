@@ -285,7 +285,7 @@
             <div class="input-group">
                 <div class="input-label">USD → VND (рынок)</div>
                 <div class="input-wrapper">
-                    <input type="tel" "id="marketUsdVnd" placeholder="-" oninput="formatAndCalculate(this); calculate()">
+                    <input type="tel" pattern="^[ 0-9]+$" "id="marketUsdVnd" placeholder="-" oninput="formatAndCalculate(this); calculate()">
                     <span class="currency-symbol">₫</span>
                 </div>
             </div>
@@ -311,7 +311,7 @@
             <div class="input-group">
                 <div class="input-label">USD → VND (новые доллары)</div>
                 <div class="input-wrapper">
-                    <input type="number" pattern="[0-9]" id="exchangeUsdVndNew" placeholder="Количество VND за 1 новый USD" oninput="formatAndCalculate(this); calculate()">
+                    <input type="number" pattern="^[ 0-9]+$" id="exchangeUsdVndNew" placeholder="Количество VND за 1 новый USD" oninput="formatAndCalculate(this); calculate()">
                     <span class="currency-symbol">₫</span>
                 </div>
                 <div id="diffUsdNew" class="difference-info" style="display: none;"></div>
