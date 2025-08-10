@@ -5,11 +5,13 @@ let calculatorInitialized = false; // Флаг инициализации кал
 
 // Service Worker registration for PWA
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(function(registration) {
-        console.log('ServiceWorker registered');
-    }).catch(function(err) {
-        console.log('ServiceWorker registration failed: ', err);
-    });
+    navigator.serviceWorker.register('sw.js')
+        .then(function(registration) {
+            console.log('ServiceWorker registered with scope:', registration.scope);
+        })
+        .catch(function(err) {
+            console.log('ServiceWorker registration failed: ', err);
+        });
 }
 
 // Установить последнее активное поле
@@ -196,7 +198,9 @@ function handleCurrencyChange() {
     // Обновляем калькулятор, если он активен
     if (isCalculatorMode && calculatorInitialized) {
         const isUsd = document.querySelector('input[name="currency"]:checked').value === 'USD';
-        document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
+        if (document.getElementById('currentCurrency')) {
+            document.getElementById('currentCurrency').value = isUsd ? 'USD' : 'EUR';
+        }
         updateCurrencyButton();
         // Также пересчитываем значения в калькуляторе
         updateCalculatorFromMain();
@@ -247,13 +251,17 @@ function calculateDifference() {
         document.getElementById('differenceResult').innerHTML = resultText;
         
         if (isCalculatorMode && calculatorInitialized) {
-            document.getElementById('calculatorDifferenceResult').innerHTML = resultText;
+            if (document.getElementById('calculatorDifferenceResult')) {
+                document.getElementById('calculatorDifferenceResult').innerHTML = resultText;
+            }
         }
     } else {
         const noDataText = 'Введите данные для расчета';
         document.getElementById('differenceResult').innerHTML = noDataText;
         if (isCalculatorMode && calculatorInitialized) {
-            document.getElementById('calculatorDifferenceResult').innerHTML = noDataText;
+            if (document.getElementById('calculatorDifferenceResult')) {
+                document.getElementById('calculatorDifferenceResult').innerHTML = noDataText;
+            }
         }
     }
 }
@@ -458,7 +466,7 @@ function createCalculator() {
         if (document.getElementById('showAllFooterBtn')) {
             document.getElementById('showAllFooterBtn').addEventListener('click', toggleCalculatorMode);
         }
-    }, 0);
+    }, 100); // Небольшая задержка для уверенности в создании DOM
 }
 
 // Инициализация калькуляторного режима
@@ -828,20 +836,6 @@ document.addEventListener('DOMContentLoaded', () => {
       input.value = savedValue;
     }
   });
-  
-  // Добавляем обработчик для клика на полях калькулятора (если они уже есть)
-  // Это нужно на случай, если калькулятор был создан ранее (например, при перезагрузке в режиме калькулятора)
-  if (document.getElementById('vndCalculatorField')) {
-    document.getElementById('vndCalculatorField').addEventListener('click', () => {
-        setActiveCalculatorField('vnd');
-    });
-  }
-  
-  if (document.getElementById('rubCalculatorField')) {
-    document.getElementById('rubCalculatorField').addEventListener('click', () => {
-        setActiveCalculatorField('rub');
-    });
-  }
   
   // Инициализация при загрузке
   handleCurrencyChange();
