@@ -142,7 +142,7 @@
             const usdPrice = getNumericValue('usdPrice');
             const eurPrice = getNumericValue('eurPrice');
 
-         function exchangeDiff(market, exchange, prise) {
+         let exchangeDiff(market, exchange, prise) {
              if (market && exchange && prise) {
                 const diff = market - exchange;
                 const rubDiff = diff / (exchange / prise);
