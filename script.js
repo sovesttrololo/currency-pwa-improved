@@ -821,18 +821,6 @@ function updateMainFields() {
     handleCurrencyChange(); // Используем обновленный обработчик
 }
 
-// При загрузке страницы восстанавливаем значения, кроме полей биржевого курса
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('input').forEach(input => {
-    // Поля биржевого курса (marketUsdVnd, marketEurVnd) не восстанавливаем из localStorage
-    if (input.id !== 'marketUsdVnd' && input.id !== 'marketEurVnd') {
-      const savedValue = localStorage.getItem(input.id);
-      if (savedValue !== null) {
-        input.value = savedValue;
-      }
-    }
-  });
-});
   
 // При вводе сохраняем значение поля, кроме полей биржевого курса
 document.querySelectorAll('input').forEach(input => {
