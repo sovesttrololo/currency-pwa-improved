@@ -141,42 +141,30 @@
             const marketEur = getNumericValue('marketEurVnd');
             const usdPrice = getNumericValue('usdPrice');
             const eurPrice = getNumericValue('eurPrice');
-            
-            // USD New difference - corrected formula
-            const exchangeUsdNew = getNumericValue('exchangeUsdVndNew');
-            if (marketUsd && exchangeUsdNew && usdPrice) {
-                const diff = marketUsd - exchangeUsdNew;
-                const rubDiff = diff / (exchangeUsdNew / usdPrice);
+
+         function exchangeDiff(market, exchange, prise) {
+             if (market && exchange && prise) {
+                const diff = market - exchange;
+                const rubDiff = diff / (exchange / prise);
                 document.getElementById('diffUsdNew').style.display = 'block';
                 document.getElementById('diffUsdNew').innerHTML = 
                     `Разница c биржевым курсом: ${diff.toLocaleString('ru-RU')} ₫ ≈ ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
             } else {
                 document.getElementById('diffUsdNew').style.display = 'none';
-            }
+            }          
+        }
+            
+            // USD New difference - corrected formula
+            const exchangeUsdNew = getNumericValue('exchangeUsdVndNew');
+         exchangeDiff(marketUs,exchangeUsdNew,usdPrice);    
             
             // USD Old difference - corrected formula
             const exchangeUsdOld = getNumericValue('exchangeUsdVndOld');
-            if (marketUsd && exchangeUsdOld && usdPrice) {
-                const diff = marketUsd - exchangeUsdOld;
-                const rubDiff = diff / (exchangeUsdOld / usdPrice);
-                document.getElementById('diffUsdOld').style.display = 'block';
-                document.getElementById('diffUsdOld').innerHTML = 
-                    `Разница c биржевым курсом: ${diff.toLocaleString('ru-RU')} ₫ ≈ ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
-            } else {
-                document.getElementById('diffUsdOld').style.display = 'none';
-            }
+         exchangeDiff(marketUs,exchangeUsdOld,usdPrice);
             
             // EUR difference - corrected formula
             const exchangeEur = getNumericValue('exchangeEurVnd');
-            if (marketEur && exchangeEur && eurPrice) {
-                const diff = marketEur - exchangeEur;
-                const rubDiff = diff / (exchangeEur / eurPrice);
-                document.getElementById('diffEur').style.display = 'block';
-                document.getElementById('diffEur').innerHTML = 
-                    `Разница c биржевым курсом: ${diff.toLocaleString('ru-RU')} ₫ ≈ ${Math.abs(rubDiff).toFixed(2).replace('.', ',')} ₽`;
-            } else {
-                document.getElementById('diffEur').style.display = 'none';
-            }
+         exchangeDiff(marketEur,exchangeEur,eurPrice);
             
             // Calculate overall difference
             calculateDifference();
