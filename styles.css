@@ -234,7 +234,7 @@
             input {
                 font-size: 16px !important;
             }
-			/* Исправления для калькуляторного режима */
+			/* Стили для калькулятора */
 .calculator-mode {
     position: fixed;
     top: 0;
@@ -248,13 +248,17 @@
     padding: 20px;
     box-sizing: border-box;
     overflow-y: auto;
-    touch-action: manipulation; /* Предотвращает двойной тап для увеличения */
+    touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
 }
 
 .calculator-header {
     flex: 0 0 auto;
     margin-bottom: 15px;
+}
+
+#calculatorDifferenceResult {
+    display: block !important;
 }
 
 .input-field-container {
@@ -290,11 +294,13 @@
     margin: 5px 0;
     cursor: pointer;
     transition: all 0.3s;
+    border: 1px solid #e0e0e0;
 }
 
 .input-field.active {
     background: white;
     box-shadow: 0 0 0 2px #667eea;
+    border-color: #667eea;
 }
 
 .input-value {
@@ -305,6 +311,12 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    outline: none;
+}
+
+.input-value:empty::before {
+    content: '0';
+    color: #aaa;
 }
 
 .calculator-keypad {
@@ -315,41 +327,54 @@
     margin-bottom: 20px;
 }
 
+.keypad-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.key {
+    flex: 1;
+    height: 50px;
+    border-radius: 8px;
+    font-size: 18px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: none;
+    font-weight: 500;
+}
 
 .key:active {
     transform: scale(0.95);
     opacity: 0.8;
 }
 
-.currency-exchange {
-    width: 100%;
-    height: 100%;
-    perspective: 1000px;
+.digit-key {
+    background-color: #f0f0f0;
+    color: #333;
 }
 
-.currency-exchange .front,
-.currency-exchange .back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.6s;
+.math-key {
+    background-color: #ff9500;
+    color: white;
+}
+
+.action-key {
+    background-color: #a6a6a6;
+    color: white;
+}
+
+.action-key.exchange-currency {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 14px;
     font-weight: bold;
-}
-
-.currency-exchange .back {
-    transform: rotateY(180deg);
-}
-
-.currency-exchange.flipped .front {
-    transform: rotateY(180deg);
-}
-
-.currency-exchange.flipped .back {
-    transform: rotateY(0deg);
 }
 
 .calculator-footer {
@@ -358,41 +383,22 @@
     margin-top: 10px;
 }
 
-.button-row {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-    flex-wrap: wrap;
-}
-
 .conversion-button {
     flex: 1;
     min-width: 100px;
-    padding: 8px;
+    padding: 12px;
     font-size: 14px;
 }
 
-/* Скрытие стандартной клавиатуры */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-input[type=number] {
-    -moz-appearance: textfield;
-}
-
-/* Отключение увеличения при двойном тапе */
-* {
-    touch-action: manipulation;
-}
-
 /* Для мобильных устройств */
+@media (max-width: 480px) {
+    .input-field {
+        font-size: 24px;
+    }
+    
     .key {
-        width: 45px;
-        height: 45px;
         font-size: 16px;
+        height: 45px;
     }
     
     .exchange-icon-container {
@@ -407,86 +413,5 @@ input[type=number] {
     .button-row .conversion-button {
         width: 100%;
     }
-}
-			/* Новые стили для калькулятора */
-.calculator-keypad {
-    margin-top: 20px;
-}
-
-.keypad-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.key {
-    width: calc(25% - 6px);
-    height: 50px;
-    border-radius: 8px;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.action-key {
-    background-color: #e0e0e0;
-    color: #333;
-}
-
-.digit-key {
-    background-color: #f0f0f0;
-    color: #333;
-}
-
-.math-key {
-    background-color: #ff9500;
-    color: white;
-}
-
-.exchange-currency {
-    background: transparent;
-    padding: 0;
-    width: 50px;
-    height: 50px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.exchange-currency svg {
-    transform: translateX(-2px);
-}
-
-/* Для мобильных устройств */
-@media (max-width: 480px) {
-    .key {
-        font-size: 16px;
-    }
-}
-.currency-flip {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    perspective: 1000px;
-    transform-style: preserve-3d;
-    transition: transform 0.6s;
-}
-
-.currency-front, .currency-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-}
-
-.currency-back {
-    transform: rotateY(180deg);
-}
-
-.exchange-currency.flipped .currency-flip {
-    transform: rotateY(180deg);
 }
         }
