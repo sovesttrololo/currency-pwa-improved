@@ -843,10 +843,11 @@ function updateMainFields() {
     handleCurrencyChange(); // Используем обновленный обработчик
 }
 
-  
+const EXCLUDED_FROM_STORAGE = ['marketUsdVnd', 'marketEurVnd'];
 // При вводе сохраняем значение поля
 document.querySelectorAll('input').forEach(input => {
-    let eventType;
+    if (!EXCLUDED_FROM_STORAGE.includes(input.id)) {
+     let eventType;
      if (input.type === 'checkbox' || input.type === 'radio') {
         eventType = 'change';
     } else {
@@ -863,6 +864,7 @@ document.querySelectorAll('input').forEach(input => {
             localStorage.setItem(input.id, input.value);
          }
     });
+    }
 });
 
 document.querySelectorAll('input[name="currency"]').forEach(radio => {
