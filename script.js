@@ -379,7 +379,7 @@ function createCalculator() {
             <!-- Пятая строка кнопок -->
             <div class="keypad-row">
                 <button class="key action-key exchange-currency" id="currencyToggleButton">
-                    $➱₫
+                    USD => VND
                 </button>
                 <button class="key digit-key" id="digit0Btn">0</button>
                 <button class="key digit-key" id="decimalBtn">,</button>
