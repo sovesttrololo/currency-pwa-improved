@@ -852,10 +852,10 @@ document.querySelectorAll('input').forEach(input => {
         localStorage.setItem(input.id, input.checked);
       } else {
         const valueToStore = input.value;
-        const keyToStoe = input.key;
-            localStorage.setItem(input.id, valueToStore);
-            if (keyToStoe == 'EUR' || keyToStoe == 'USD' || valueToStore == 'EUR' || valueToStore == 'USD' ) {
-                localStorage.removeItem(input.id);
+        const idToStore = input.id;
+            
+            if (idToStore !== null || idToStore !== "") {
+                localStorage.setItem(idToStoe, valueToStore);
          }
         }
     });
