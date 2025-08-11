@@ -850,8 +850,13 @@ document.querySelectorAll('input').forEach(input => {
     input.addEventListener(eventType, () => {
         if (input.type === 'checkbox') {
         localStorage.setItem(input.id, input.checked);
-      } else {  
-        localStorage.setItem(input.id, input.value);
+      } else {
+        const valueToStore = input.value;
+        const keyToStoe = input.key;
+            localStorage.setItem(input.id, valueToStore);
+            if (keyToStoe == 'EUR' || keyToStoe == 'USD' || valueToStore == 'EUR' || valueToStore == 'USD' ) {
+                localStorage.removeItem(input.id);
+         }
         }
     });
 });
@@ -867,7 +872,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (input.type === 'checkbox') {
           input.checked = savedValue === 'true';
         } else {
-      if (savedValue !== null || input.value !== null || input.id !== null) {
+      if (savedValue !== null) {
         input.value = savedValue;
       }
       }
