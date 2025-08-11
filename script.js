@@ -846,18 +846,22 @@ function updateMainFields() {
   
 // При вводе сохраняем значение поля
 document.querySelectorAll('input').forEach(input => {
-    const eventType = input.type === 'checkbox' ? 'change' : 'input';
+    let eventType;
+     if (input.type === 'checkbox' || input.type === 'radio') {
+        eventType = 'change';
+    } else {
+        eventType = 'input';
+    }
     input.addEventListener(eventType, () => {
         if (input.type === 'checkbox') {
         localStorage.setItem(input.id, input.checked);
-      } else {
-        const valueToStore = input.value;
-        const keyToStoe = input.key;
-            localStorage.setItem(input.id, valueToStore);
-            if (keyToStoe == 'EUR' || keyToStoe == 'USD' || valueToStore == 'EUR' || valueToStore == 'USD' ) {
-                localStorage.removeItem(input.id);
+      } else if (input.type === 'radio') {
+            if (input.checked) {
+                localStorage.setItem(input.name, input.value);
+            }
+        } else {
+            localStorage.setItem(input.id, input.value);
          }
-        }
     });
 });
 
@@ -871,6 +875,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const savedValue = localStorage.getItem(input.id);
       if (input.type === 'checkbox') {
           input.checked = savedValue === 'true';
+        } else if (input.type === 'radio') {
+            input.checked = localStorage.getItem(input.name) === input.value;
         } else {
       if (savedValue !== null) {
         input.value = savedValue;
@@ -878,8 +884,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   });
     calculate();
-  updateConversion();
-  calculateDifference();
+    updateConversion();
+    calculateDifference();
 });
   // Инициализация при загрузке
   handleCurrencyChange();
