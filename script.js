@@ -819,7 +819,7 @@ function updateCurrencyButton() {
     if (!currencyElement || !buttonElement) return;
     
     const currentCurrency = currencyElement.value;
-    buttonElement.textContent = currentCurrency === 'USD' ? '$➱₫' : '€➱₫';
+    buttonElement.textContent = currentCurrency === 'USD' ? 'USD => VND' : 'EUR => VND';
 }
 
 // Обновление основных полей из калькулятора
