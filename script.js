@@ -17,7 +17,7 @@ if ('serviceWorker' in navigator) {
 // Установить последнее активное поле
 function setLastActive(field) {
     lastActiveField = field;
-}
+}usd
 
 // Format number with thousands separator
 function formatNumber(input) {
@@ -379,7 +379,7 @@ function createCalculator() {
             <!-- Пятая строка кнопок -->
             <div class="keypad-row">
                 <button class="key action-key exchange-currency" id="currencyToggleButton">
-                    USD => VND
+                    $➱₫
                 </button>
                 <button class="key digit-key" id="digit0Btn">0</button>
                 <button class="key digit-key" id="decimalBtn">,</button>
@@ -819,7 +819,7 @@ function updateCurrencyButton() {
     if (!currencyElement || !buttonElement) return;
     
     const currentCurrency = currencyElement.value;
-    buttonElement.textContent = currentCurrency === 'USD' ? 'USD => VND' : 'EUR => VND';
+    buttonElement.textContent = currentCurrency === 'USD' ? '$➱₫' : '€➱₫';
 }
 
 // Обновление основных полей из калькулятора
