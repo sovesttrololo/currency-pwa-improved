@@ -408,19 +408,19 @@ button:active {
 }
 
 .digit-key {
-    background-color: #e8e8e8;
-    color: #444; /* Светлее, но не как у кнопок */
+    background: linear-gradient(135deg, #000000 0%, #764ba2 100%);
+    color: white;
     font-weight: 600;
 }
 
 .math-key {
-    background-color: #ff9500;
+    background: linear-gradient(135deg, #ff9500 0%, #764ba2 100%);
     color: white;
     font-weight: 600;
 }
 
 .action-key {
-    background-color: #b0b0b0;
+    background: linear-gradient(135deg, #b0b0b0 0%, #764ba2 100%);
     color: white;
     font-weight: 600;
 }
@@ -428,7 +428,6 @@ button:active {
 .action-key.exchange-currency {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    font-size: 14px; /* Шрифт чуть меньше */
     font-weight: bold;
 }
 
