@@ -850,12 +850,8 @@ document.querySelectorAll('input').forEach(input => {
     input.addEventListener(eventType, () => {
         if (input.type === 'checkbox') {
         localStorage.setItem(input.id, input.checked);
-      } else {
-        const idToStore = localStorage.getItem(input.id);    
+      } else {  
         localStorage.setItem(input.id, input.value);
-            if (idToStore == null) {
-                 localStorage.removeItem(input.id);
-            }
         }
     });
 });
@@ -871,7 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (input.type === 'checkbox') {
           input.checked = savedValue === 'true';
         } else {
-      if (savedValue !== null) {
+      if (savedValue !== null || input.value !== null || input.id !== null) {
         input.value = savedValue;
       }
       }
