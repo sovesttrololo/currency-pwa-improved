@@ -851,12 +851,11 @@ document.querySelectorAll('input').forEach(input => {
         if (input.type === 'checkbox') {
         localStorage.setItem(input.id, input.checked);
       } else {
-        const valueToStore = input.value;
-        const idToStore = input.id;
-            
-            if (idToStore !== null || idToStore !== "") {
-                localStorage.setItem(idToStoe, valueToStore);
-         }
+        const idToStore = localStorage.getItem(input.id);    
+        localStorage.setItem(input.id, input.value);
+            if (idToStore == null) {
+                 localStorage.removeItem(input.id);
+            }
         }
     });
 });
