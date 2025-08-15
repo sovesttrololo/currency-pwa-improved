@@ -40,6 +40,7 @@
         <!-- Блок 2: Биржевой курс -->
         <div class="block">
             <div class="block-title">Биржевой курс</div>
+            <div id="lastRatesUpdate" class="last-update" style="display:none;"></div>
             <div class="input-group">
                 <div class="input-label">USD → VND (рынок)</div>
                 <div class="input-wrapper">
@@ -55,7 +56,7 @@
                 </div>
             </div>
             <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button onclick="fetchRates()" style="flex: 1;">Подтянуть</button>
+                <button onclick="fetchRates()" style="flex: 1;">Актуализировать</button>
                 <button class="clear-button" onclick="clearMarketRates()" style="flex: 1;">Сбросить</button>
             </div>
         </div>
