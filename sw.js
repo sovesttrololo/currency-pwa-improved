@@ -39,34 +39,37 @@ self.addEventListener('activate', event => {
 
 // Обработка запросов - сначала сеть, потом кэш (Network First для HTML/JS/CSS)
 self.addEventListener('fetch', event => {
-  // Для HTML, CSS, JS файлов используем Network First стратегию
-  if (event.request.destination === 'document' || 
-      event.request.destination === 'script' || 
-      event.request.destination === 'style') {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          // Клонируем ответ для кэширования
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          return response;
-        })
-        .catch(() => {
-          // Если сеть недоступна, берем из кэша
-          return caches.match(event.request);
-        })
-    );
-  } else {
-    // Для других ресурсов (изображения и т.д.) используем Cache First
-    event.respondWith(
-      caches.match(event.request)
-        .then(response => {
-          // Возвращаем кэшированную версию или загружаем из сети
-          return response || fetch(event.request);
-        })
-    );
-  }
+    if (event.request.mode === 'navigate') {
+        // Для HTML — Cache First
+        event.respondWith(
+            caches.match(event.request).then(response => {
+                return response || fetch(event.request).then(resp => {
+                    return caches.open(CACHE_NAME).then(cache => {
+                        cache.put(event.request, resp.clone());
+                        return resp;
+                    });
+                });
+            })
+        );
+    } else if (event.request.destination === 'script' || event.request.destination === 'style') {
+        // Для JS/CSS — Cache First
+        event.respondWith(
+            caches.match(event.request).then(response => {
+                return response || fetch(event.request).then(resp => {
+                    caches.open(CACHE_NAME).then(cache => {
+                        cache.put(event.request, resp.clone());
+                    });
+                    return resp;
+                });
+            })
+        );
+    } else {
+        // Остальное — Cache First
+        event.respondWith(
+            caches.match(event.request).then(response => {
+                return response || fetch(event.request);
+            })
+        );
+    }
 });
+
