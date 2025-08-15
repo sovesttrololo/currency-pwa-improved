@@ -445,6 +445,12 @@ button:active {
     border-radius: 10px;
 }
 
+.last-update {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
 /* Для мобильных устройств */
 @media (max-width: 480px) {
     .input-field {
