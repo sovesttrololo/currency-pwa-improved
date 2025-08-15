@@ -65,7 +65,9 @@ async function fetchRates() {
         const eurToUsd = data.rates.EUR;
         const eurToVnd = Math.round(usdToVnd / eurToUsd);
         document.getElementById('marketUsdVnd').value = usdToVnd.toLocaleString('ru-RU');
+        localStorage.setItem('marketUsdVnd', document.getElementById('marketUsdVnd').value);
         document.getElementById('marketEurVnd').value = eurToVnd.toLocaleString('ru-RU');
+        localStorage.setItem('marketEurVnd', document.getElementById('marketEurVnd').value);
         handleCurrencyChange();
         // Сохраняем дату и время обновления
         const now = new Date();
