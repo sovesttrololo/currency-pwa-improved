@@ -67,6 +67,14 @@ async function fetchRates() {
         document.getElementById('marketUsdVnd').value = usdToVnd.toLocaleString('ru-RU');
         document.getElementById('marketEurVnd').value = eurToVnd.toLocaleString('ru-RU');
         handleCurrencyChange();
+        // Сохраняем дату и время обновления
+        const now = new Date();
+        const formattedDate = now.toLocaleDateString('ru-RU') + ' в ' +
+            now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+        localStorage.setItem('lastRatesUpdate', formattedDate);
+        document.getElementById('lastRatesUpdate').textContent = 'Обновлено ' + formattedDate;
+        document.getElementById('lastRatesUpdate').style.display = 'block';
+
     } catch (error) {
         alert('Не удалось загрузить курсы валют. Проверьте интернет-соединение.');
     }
@@ -280,6 +288,7 @@ function toggleCalculatorMode() {
     }
 
     isCalculatorMode = !isCalculatorMode;
+    localStorage.setItem('calculatorOpen', isCalculatorMode ? 'true' : 'false');
 
     if (isCalculatorMode) {
         // Если калькулятор еще не создан, создаем его
@@ -843,29 +852,29 @@ function updateMainFields() {
     handleCurrencyChange(); // Используем обновленный обработчик
 }
 
-const EXCLUDED_FROM_STORAGE = ['marketUsdVnd', 'marketEurVnd'];
-// При вводе сохраняем значение поля
 document.querySelectorAll('input').forEach(input => {
-    if (!EXCLUDED_FROM_STORAGE.includes(input.id)) {
-     let eventType;
-     if (input.type === 'checkbox' || input.type === 'radio') {
+    let eventType;
+    if (input.type === 'checkbox' || input.type === 'radio') {
         eventType = 'change';
     } else {
         eventType = 'input';
     }
+
     input.addEventListener(eventType, () => {
         if (input.type === 'checkbox') {
-        localStorage.setItem(input.id, input.checked);
-      } else if (input.type === 'radio') {
+            localStorage.setItem(input.id, input.checked);
+        } 
+        else if (input.type === 'radio') {
             if (input.checked) {
                 localStorage.setItem(input.name, input.value);
             }
-        } else {
+        } 
+        else {
             localStorage.setItem(input.id, input.value);
-         }
+        }
     });
-    }
 });
+
 
 document.querySelectorAll('input[name="currency"]').forEach(radio => {
   radio.addEventListener('change', handleCurrencyChange);
@@ -874,17 +883,33 @@ document.querySelectorAll('input[name="currency"]').forEach(radio => {
 // При загрузке страницы восстанавливаем значения
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('input').forEach(input => {      
-      const savedValue = localStorage.getItem(input.id);
-      if (input.type === 'checkbox') {
-          input.checked = savedValue === 'true';
-        } else if (input.type === 'radio') {
-            input.checked = localStorage.getItem(input.name) === input.value;
-        } else {
-      if (savedValue !== null) {
-        input.value = savedValue;
-      }
-      }
-  });
+    if (input.type === 'checkbox') {
+        input.checked = localStorage.getItem(input.id) === 'true';
+    } 
+    else if (input.type === 'radio') {
+        input.checked = localStorage.getItem(input.name) === input.value;
+    } 
+    else {
+        const savedValue = localStorage.getItem(input.id);
+        if (savedValue !== null) {
+            input.value = savedValue;
+        }
+    }
+});
+
+
+    // Восстановление даты последнего обновления курсов
+    const savedUpdate = localStorage.getItem('lastRatesUpdate');
+    if (savedUpdate) {
+        document.getElementById('lastRatesUpdate').textContent = 'Обновлено ' + savedUpdate;
+        document.getElementById('lastRatesUpdate').style.display = 'block';
+    }
+
+// Восстановление состояния калькулятора
+    if (localStorage.getItem('calculatorOpen') === 'true') {
+        toggleCalculatorMode();
+    }
+
     calculate();
     updateConversion();
     calculateDifference();
